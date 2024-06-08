@@ -93,7 +93,7 @@
                 <v-card-title class="window-title">Log in</v-card-title>
                 <v-card-text>
                     <v-form>
-                        <v-text-field label="Email" required></v-text-field>
+                        <v-text-field label="Username or email" required></v-text-field>
                         <v-text-field label="Password" type="password" required></v-text-field>
                     </v-form>
                 </v-card-text>
@@ -101,6 +101,25 @@
                     <v-spacer></v-spacer>
                     <v-btn color="blue darken-1" text @click="showLoginDialog = false">Cancel</v-btn>
                     <v-btn color="blue darken-1" text @click="login">Log in</v-btn>
+                </v-card-actions>
+            </v-card>
+        </v-dialog>
+
+        <v-dialog v-model="showRegisterDialog" persistent max-width="400px">
+            <v-card>
+                <v-card-title class="window-title">Sign up</v-card-title>
+                <v-card-text>
+                    <v-form>
+                        <v-text-field label="Username" required></v-text-field>
+                        <v-text-field label="Email" required></v-text-field>
+                        <v-text-field label="Password" type="password" required></v-text-field>
+                        <v-text-field label="Name"></v-text-field>
+                    </v-form>
+                </v-card-text>
+                <v-card-actions>
+                    <v-spacer></v-spacer>
+                    <v-btn color="blue darken-1" text @click="showRegisterDialog = false">Cancel</v-btn>
+                    <v-btn color="blue darken-1" text @click="register">Sign up</v-btn>
                 </v-card-actions>
             </v-card>
         </v-dialog>
