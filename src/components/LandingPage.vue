@@ -3,8 +3,8 @@
         <v-toolbar color="primary" dark prominent>
             <v-toolbar-title>PennyPlanner</v-toolbar-title>
             <v-spacer></v-spacer>
-            <v-btn>Log in</v-btn>
-            <v-btn>Sign up</v-btn>
+            <v-btn @click="showLoginDialog = true">Log in</v-btn>
+            <v-btn @click="showRegisterDialog = true">Sign up</v-btn>
         </v-toolbar>
 
         <v-container fluid>
@@ -15,7 +15,8 @@
                             <h1 class="display-1">Welcome to PennyPlanner!</h1>
                             <h2 class="display-2">Who fails to plan - plans to fail</h2>
                             <p class="body-1">
-                                Managing your personal finances has never been easier. <strong>PennyPlanner</strong> is designed to help
+                                Managing your personal finances has never been easier. <strong>PennyPlanner</strong> is
+                                designed to help
                                 you take full control of your financial future with a suite of powerful tools and
                                 intuitive features. Whether you're tracking multiple accounts, categorizing expenses, or
                                 setting financial goals, PennyPlanner provides everything you need to make informed
@@ -72,7 +73,8 @@
                                 </li>
                             </ul>
                             <p class="body-1">
-                                Become the latest person who has taken control of their finances with <strong>PennyPlanner</strong>.
+                                Become the latest person who has taken control of their finances with
+                                <strong>PennyPlanner</strong>.
                                 Start your journey to financial freedom today!
                             </p>
                         </v-card-text>
@@ -85,6 +87,27 @@
                 </v-col>
             </v-row>
         </v-container>
+
+        <v-dialog v-model="showLoginDialog" persistent max-width="400px">
+            <v-card>
+                <v-card-title class="window-title">Log in</v-card-title>
+                <v-card-text>
+                    <v-form>
+                        <v-text-field label="Email" required></v-text-field>
+                        <v-text-field label="Password" type="password" required></v-text-field>
+                    </v-form>
+                </v-card-text>
+                <v-card-actions>
+                    <v-spacer></v-spacer>
+                    <v-btn color="blue darken-1" text @click="showLoginDialog = false">Cancel</v-btn>
+                    <v-btn color="blue darken-1" text @click="login">Log in</v-btn>
+                </v-card-actions>
+            </v-card>
+        </v-dialog>
+
+        <v-overlay :value="showLoginDialog || showRegisterDialog">
+            <div class="blur-background"></div>
+        </v-overlay>
     </div>
 </template>
 
@@ -93,13 +116,20 @@ export default {
     name: 'LandingPage',
     data() {
         return {
-            showLoginDialog: false
+            showLoginDialog: false,
+            showRegisterDialog: false
         };
     },
     methods: {
         login() {
             // Add your login logic here
+            console.log("login")
             this.showLoginDialog = false;
+        },
+        register () {
+            // Add your register logic here
+            console.log("register")
+            this.showRegisterDialog = false;
         }
     }
 }
@@ -142,5 +172,23 @@ li {
 
 .mb-4 {
     margin-bottom: 16px;
+}
+
+.blur-background {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(15px);
+}
+
+.window-title {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #3f51b5;
+    text-align: center;
+    width: 100%;
 }
 </style>
