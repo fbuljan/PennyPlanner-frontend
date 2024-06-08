@@ -1,19 +1,19 @@
 <template>
   <v-app>
     <v-main>
-      <HelloWorld/>
+      <LandingPage/>
     </v-main>
   </v-app>
 </template>
 
-<script>
-import HelloWorld from './components/HelloWorld.vue'
+<script
+>import LandingPage from './components/LandingPage.vue'
 
 export default {
   name: 'App',
 
   components: {
-    HelloWorld,
+    LandingPage,
   },
 
   data: () => ({
