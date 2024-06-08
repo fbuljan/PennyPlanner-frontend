@@ -13,19 +13,11 @@ axiosInstance.interceptors.request.use(
     config => {
         console.log('Request config:', config);  // Add logging to debug request configuration
         return config;
-    },
-    error => {
-        console.error('Request error:', error);
-        return Promise.reject(error);
     }
 );
 
 axiosInstance.interceptors.response.use(
-    response => response,
-    error => {
-        console.error('Response error:', error);
-        return Promise.reject(error);
-    }
+    response => response
 );
 
 export default axiosInstance;

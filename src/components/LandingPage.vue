@@ -99,6 +99,11 @@
                         <v-text-field v-model="loginData.password" label="Password" type="password"
                             required></v-text-field>
                     </v-form>
+                    <v-divider class="mt-4"></v-divider>
+                    <v-row justify="center" class="mt-2">
+                        <span>Don't have an account? <a href="#"
+                                @click.prevent="showRegisterDialog = true; showLoginDialog = false;">Sign up!</a></span>
+                    </v-row>
                 </v-card-text>
                 <v-card-actions>
                     <v-spacer></v-spacer>
@@ -119,6 +124,11 @@
                             required></v-text-field>
                         <v-text-field v-model="registerData.name" label="Name"></v-text-field>
                     </v-form>
+                    <v-divider class="mt-4"></v-divider>
+                    <v-row justify="center" class="mt-2">
+                        <span>Already have an account? <a href="#"
+                                @click.prevent="showLoginDialog = true; showRegisterDialog = false;">Log in!</a></span>
+                    </v-row>
                 </v-card-text>
                 <v-card-actions>
                     <v-spacer></v-spacer>
