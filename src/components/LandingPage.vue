@@ -1,7 +1,7 @@
 <template>
     <div>
         <v-toolbar color="primary" dark prominent>
-            <v-toolbar-title>PennyPlanner</v-toolbar-title>
+            <v-toolbar-title><strong>PennyPlanner</strong></v-toolbar-title>
             <v-spacer></v-spacer>
             <v-btn @click="showLoginDialog = true">Log in</v-btn>
             <v-btn @click="showRegisterDialog = true">Sign up</v-btn>
@@ -26,13 +26,15 @@
                             <ul>
                                 <li>
                                     <strong>Understand Your Spending Habits:</strong> By categorizing your transactions,
-                                    PennyPlanner helps you identify where your money goes, highlighting the most common
+                                    <strong>PennyPlanner</strong> helps you identify where your money goes, highlighting
+                                    the most common
                                     and most expensive types of expenses.
                                 </li>
                                 <li>
                                     <strong>Set and Achieve Financial Goals:</strong> Define and track goals such as
                                     overall saldo goals, account-specific saldo goals, monthly income targets, and
-                                    expense reduction targets. PennyPlanner’s goal-setting features keep you focused and
+                                    expense reduction targets. <strong>PennyPlanner</strong>'s goal-setting features
+                                    keep you focused and
                                     motivated.
                                 </li>
                                 <li>
@@ -60,7 +62,7 @@
                                 <li>
                                     <strong>Goal Setting and Achievement:</strong> Set various financial goals and track
                                     your progress. Whether it's achieving a savings target or reducing monthly expenses,
-                                    PennyPlanner helps you stay on course.
+                                    <strong>PennyPlanner</strong> helps you stay on course.
                                 </li>
                                 <li>
                                     <strong>Intelligent Tooltips:</strong> Benefit from personalized tips and
@@ -92,9 +94,10 @@
             <v-card>
                 <v-card-title class="window-title">Log in</v-card-title>
                 <v-card-text>
-                    <v-form>
-                        <v-text-field label="Username or email" required></v-text-field>
-                        <v-text-field label="Password" type="password" required></v-text-field>
+                    <v-form ref="loginForm" @submit.prevent="login">
+                        <v-text-field v-model="loginData.login" label="Username or email" required></v-text-field>
+                        <v-text-field v-model="loginData.password" label="Password" type="password"
+                            required></v-text-field>
                     </v-form>
                 </v-card-text>
                 <v-card-actions>
@@ -109,11 +112,12 @@
             <v-card>
                 <v-card-title class="window-title">Sign up</v-card-title>
                 <v-card-text>
-                    <v-form>
-                        <v-text-field label="Username" required></v-text-field>
-                        <v-text-field label="Email" required></v-text-field>
-                        <v-text-field label="Password" type="password" required></v-text-field>
-                        <v-text-field label="Name"></v-text-field>
+                    <v-form ref="registerForm" @submit.prevent="register">
+                        <v-text-field v-model="registerData.username" label="Username" required></v-text-field>
+                        <v-text-field v-model="registerData.email" label="Email" required></v-text-field>
+                        <v-text-field v-model="registerData.password" label="Password" type="password"
+                            required></v-text-field>
+                        <v-text-field v-model="registerData.name" label="Name"></v-text-field>
                     </v-form>
                 </v-card-text>
                 <v-card-actions>
@@ -136,19 +140,37 @@ export default {
     data() {
         return {
             showLoginDialog: false,
-            showRegisterDialog: false
+            showRegisterDialog: false,
+            loginData: {
+                login: '',
+                password: ''
+            },
+            registerData: {
+                username: '',
+                email: '',
+                password: '',
+                name: ''
+            }
         };
     },
     methods: {
-        login() {
-            // Add your login logic here
-            console.log("login")
-            this.showLoginDialog = false;
+        async login() {
+            try {
+                const response = await this.$axios.post('/api/User/login', this.loginData);
+                console.log(response.data);
+                this.showLoginDialog = false;
+            } catch (error) {
+                console.error('Login failed', error);
+            }
         },
-        register () {
-            // Add your register logic here
-            console.log("register")
-            this.showRegisterDialog = false;
+        async register() {
+            try {
+                const response = await this.$axios.post('/api/User/register', this.registerData);
+                console.log(response.data);
+                this.showRegisterDialog = false;
+            } catch (error) {
+                console.error('Registration failed', error);
+            }
         }
     }
 }
