@@ -11,13 +11,23 @@ const axiosInstance = axios.create({
 
 axiosInstance.interceptors.request.use(
     config => {
-        console.log('Request config:', config);  // Add logging to debug request configuration
+        const token = localStorage.getItem('jwt');
+        if (token) {
+            config.headers['Authorization'] = 'Bearer ' + token;
+        }
+        console.log('Request config:', config);
         return config;
+    },
+    error => {
+        return Promise.reject(error);
     }
 );
 
 axiosInstance.interceptors.response.use(
-    response => response
+    response => response,
+    error => {
+        return Promise.reject(error);
+    }
 );
 
 export default axiosInstance;

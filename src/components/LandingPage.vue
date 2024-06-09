@@ -175,7 +175,7 @@ export default {
         async login() {
             try {
                 const response = await this.$axios.post('/api/User/login', this.loginData);
-                console.log(response.data);
+                localStorage.setItem('jwt', response.data.token);
                 this.showLoginDialog = false;
                 this.loginError = null;
             } catch (error) {
