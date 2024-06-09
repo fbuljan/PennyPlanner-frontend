@@ -1,23 +1,13 @@
 <template>
   <v-app>
     <v-main>
-      <LandingPage/>
+      <router-view></router-view>
     </v-main>
   </v-app>
 </template>
 
-<script
->import LandingPage from './components/LandingPage.vue'
-
+<script>
 export default {
   name: 'App',
-
-  components: {
-    LandingPage,
-  },
-
-  data: () => ({
-    //
-  }),
 }
 </script>

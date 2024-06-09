@@ -101,7 +101,7 @@
                     </v-form>
                     <v-row justify="center" class="mt-2">
                         <span>Don't have an account? <a href="#"
-                                @click.prevent="showRegisterDialog = true; showLoginDialog = false; loginError = false;">Sign up!</a></span>
+                                @click.prevent="showRegisterDialog = true; showLoginDialog = false; loginError = null;">Sign up!</a></span>
                     </v-row>
                     <v-divider class="mt-4"></v-divider>
                     <v-row justify="center" class="mt-2">
@@ -110,7 +110,7 @@
                 </v-card-text>
                 <v-card-actions>
                     <v-spacer></v-spacer>
-                    <v-btn color="blue darken-1" text @click="showLoginDialog = false; loginError = false">Cancel</v-btn>
+                    <v-btn color="blue darken-1" text @click="showLoginDialog = false; loginError = null">Cancel</v-btn>
                     <v-btn color="blue darken-1" text @click="login">Log in</v-btn>
                 </v-card-actions>
             </v-card>
@@ -178,6 +178,7 @@ export default {
                 localStorage.setItem('jwt', response.data.token);
                 this.showLoginDialog = false;
                 this.loginError = null;
+                this.$router.push({ name: 'HomePage' });
             } catch (error) {
                 console.error('Login failed', error);
                 this.loginError = error.response.data.message;
@@ -185,10 +186,14 @@ export default {
         },
         async register() {
             try {
-                const response = await this.$axios.post('/api/User/register', this.registerData);
-                console.log(response.data);
+                await this.$axios.post('/api/User/register', this.registerData);
                 this.showRegisterDialog = false;
                 this.registerError = null;
+                this.loginData = {
+                    login: this.registerData.username,
+                    password: this.registerData.password
+                };
+                await this.login();
             } catch (error) {
                 console.error('Registration failed', error);
                 try {
