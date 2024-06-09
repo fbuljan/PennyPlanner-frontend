@@ -99,15 +99,18 @@
                         <v-text-field v-model="loginData.password" label="Password" type="password"
                             required></v-text-field>
                     </v-form>
-                    <v-divider class="mt-4"></v-divider>
                     <v-row justify="center" class="mt-2">
                         <span>Don't have an account? <a href="#"
-                                @click.prevent="showRegisterDialog = true; showLoginDialog = false;">Sign up!</a></span>
+                                @click.prevent="showRegisterDialog = true; showLoginDialog = false; loginError = false;">Sign up!</a></span>
+                    </v-row>
+                    <v-divider class="mt-4"></v-divider>
+                    <v-row justify="center" class="mt-2">
+                        <v-alert v-if="loginError" type="error">{{ loginError }}</v-alert>
                     </v-row>
                 </v-card-text>
                 <v-card-actions>
                     <v-spacer></v-spacer>
-                    <v-btn color="blue darken-1" text @click="showLoginDialog = false">Cancel</v-btn>
+                    <v-btn color="blue darken-1" text @click="showLoginDialog = false; loginError = false">Cancel</v-btn>
                     <v-btn color="blue darken-1" text @click="login">Log in</v-btn>
                 </v-card-actions>
             </v-card>
@@ -124,15 +127,18 @@
                             required></v-text-field>
                         <v-text-field v-model="registerData.name" label="Name"></v-text-field>
                     </v-form>
-                    <v-divider class="mt-4"></v-divider>
                     <v-row justify="center" class="mt-2">
                         <span>Already have an account? <a href="#"
-                                @click.prevent="showLoginDialog = true; showRegisterDialog = false;">Log in!</a></span>
+                                @click.prevent="showLoginDialog = true; showRegisterDialog = false; registerError = false;">Log in!</a></span>
+                    </v-row>
+                    <v-divider class="mt-4"></v-divider>
+                    <v-row justify="center" class="mt-2">
+                        <v-alert v-if="registerError" type="error">{{ registerError }}</v-alert>
                     </v-row>
                 </v-card-text>
                 <v-card-actions>
                     <v-spacer></v-spacer>
-                    <v-btn color="blue darken-1" text @click="showRegisterDialog = false">Cancel</v-btn>
+                    <v-btn color="blue darken-1" text @click="showRegisterDialog = false; registerError = false">Cancel</v-btn>
                     <v-btn color="blue darken-1" text @click="register">Sign up</v-btn>
                 </v-card-actions>
             </v-card>
@@ -160,7 +166,9 @@ export default {
                 email: '',
                 password: '',
                 name: ''
-            }
+            },
+            loginError: null,
+            registerError: null
         };
     },
     methods: {
@@ -169,8 +177,10 @@ export default {
                 const response = await this.$axios.post('/api/User/login', this.loginData);
                 console.log(response.data);
                 this.showLoginDialog = false;
+                this.loginError = null;
             } catch (error) {
                 console.error('Login failed', error);
+                this.loginError = error.response.data.message;
             }
         },
         async register() {
@@ -178,8 +188,17 @@ export default {
                 const response = await this.$axios.post('/api/User/register', this.registerData);
                 console.log(response.data);
                 this.showRegisterDialog = false;
+                this.registerError = null;
             } catch (error) {
                 console.error('Registration failed', error);
+                try {
+                    const errorArray = JSON.parse(error.response.data.detail);
+                    const errorMessages = errorArray.map(error => error.ErrorMessage);
+                    this.registerError = errorMessages[0];
+                }
+                catch (error2) {
+                    this.registerError = error.response.data.detail;
+                }
             }
         }
     }
