@@ -17,26 +17,24 @@
             </v-container>
         </v-toolbar>
 
-        <v-container fluid class="px-20">
+        <v-container fluid class="px-4">
             <v-row>
                 <v-col cols="12">
                     <h2 class="welcome-text">Welcome{{ getUserDisplayName() }}!</h2>
                 </v-col>
             </v-row>
             <v-row>
-                <v-col cols="7" class="py-2">
+                <v-col cols="12" md="7" class="py-2">
                     <v-row>
                         <v-col cols="12" class="my-2">
                             <v-card class="rectangle">
                                 <v-row style="width: 100%">
-                                    <v-col cols="6" class="d-flex flex-column align-center justify-center">
+                                    <v-col cols="12" md="6" class="d-flex flex-column align-center justify-center">
                                         <v-card-title class="larger-text-total">Current balance:</v-card-title>
                                         <v-card-subtitle class="larger-text-total display-4 text--primary">{{ totalBalance }} €</v-card-subtitle>
                                     </v-col>
-                                    <v-col cols="6" class="d-flex flex-column"
-                                        style="max-height: 250px; overflow-y: auto;">
-                                        <v-card-text v-for="account in accounts" :key="account.name"
-                                            class="account-item larger-text">
+                                    <v-col cols="12" md="6" class="d-flex flex-column" style="max-height: 250px; overflow-y: auto;">
+                                        <v-card-text v-for="account in accounts" :key="account.name" class="account-item larger-text">
                                             <strong :style="{ color: '#1867c0' }">{{ account.name }}:</strong> {{ account.balance }} €
                                         </v-card-text>
                                     </v-col>
@@ -48,14 +46,13 @@
                         </v-col>
                     </v-row>
                 </v-col>
-                <v-col cols="5" class="py-2">
+                <v-col cols="12" md="5" class="py-2">
                     <v-row>
                         <v-col cols="12" class="my-2">
                             <v-card class="rectangle">
                                 <v-card-title>Last 3 transactions</v-card-title>
                                 <v-list dense style="background-color: #f5f5f5;">
-                                    <v-list-item v-for="transaction in latestTransactions" :key="transaction.id"
-                                        class="transaction-item">
+                                    <v-list-item v-for="transaction in latestTransactions" :key="transaction.id" class="transaction-item">
                                         <v-list-item-content class="transaction-content">
                                             <v-list-item-title class="transaction-title">
                                                 <template v-if="transaction.transactionType < 0">
