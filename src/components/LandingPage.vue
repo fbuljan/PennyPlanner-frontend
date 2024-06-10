@@ -110,6 +110,7 @@
                 </v-card-text>
                 <v-card-actions>
                     <v-spacer></v-spacer>
+                    <v-btn color="blue darken-1" text @click="testLogin">Test</v-btn>
                     <v-btn color="blue darken-1" text @click="showLoginDialog = false; loginError = null">Cancel</v-btn>
                     <v-btn color="blue darken-1" text @click="login">Log in</v-btn>
                 </v-card-actions>
@@ -176,6 +177,7 @@ export default {
             try {
                 const response = await this.$axios.post('/api/User/login', this.loginData);
                 localStorage.setItem('jwt', response.data.token);
+                localStorage.setItem('id', response.data.user.id);
                 this.showLoginDialog = false;
                 this.loginError = null;
                 this.$router.push({ name: 'HomePage' });
@@ -205,6 +207,12 @@ export default {
                     this.registerError = error.response.data.detail;
                 }
             }
+        },
+        async testLogin() {
+            this.loginData = {
+                login: "filip123456",
+                password: "Volimliverpool1"
+            };
         }
     }
 }
