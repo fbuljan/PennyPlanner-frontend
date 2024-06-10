@@ -28,18 +28,16 @@
                     <v-row>
                         <v-col cols="12" class="my-2">
                             <v-card class="rectangle">
-                                <v-row>
+                                <v-row style="width: 100%">
                                     <v-col cols="6" class="d-flex flex-column align-center justify-center">
-                                        <v-card-title>Current balance:</v-card-title>
-                                        <v-card-subtitle class="display-4 text--primary">{{ totalBalance }}
-                                            €</v-card-subtitle>
+                                        <v-card-title class="larger-text-total">Current balance:</v-card-title>
+                                        <v-card-subtitle class="larger-text-total display-4 text--primary">{{ totalBalance }} €</v-card-subtitle>
                                     </v-col>
-                                    <v-col cols="6" class="d-flex flex-column justify-center"
+                                    <v-col cols="6" class="d-flex flex-column"
                                         style="max-height: 250px; overflow-y: auto;">
                                         <v-card-text v-for="account in accounts" :key="account.name"
-                                            class="account-item">
-                                            <strong :style="{ color: '#1867c0' }">{{ account.name }}:</strong> {{
-                                            account.balance }} €
+                                            class="account-item larger-text">
+                                            <strong :style="{ color: '#1867c0' }">{{ account.name }}:</strong> {{ account.balance }} €
                                         </v-card-text>
                                     </v-col>
                                 </v-row>
@@ -55,8 +53,7 @@
                         <v-col cols="12" class="my-2">
                             <v-card class="rectangle">
                                 <v-card-title>Last 3 transactions</v-card-title>
-                                <v-list dense style="
-    background-color: #f5f5f5;">
+                                <v-list dense style="background-color: #f5f5f5;">
                                     <v-list-item v-for="transaction in latestTransactions" :key="transaction.id"
                                         class="transaction-item">
                                         <v-list-item-content class="transaction-content">
@@ -70,8 +67,7 @@
                                                 {{ transaction.amount }} €
                                             </v-list-item-title>
                                             <v-list-item-subtitle>
-                                                {{ transaction.description ? transaction.description : 'No description'
-                                                }}
+                                                {{ transaction.description ? transaction.description : 'No description' }}
                                             </v-list-item-subtitle>
                                             <v-list-item-subtitle>
                                                 {{ new Date(transaction.date).toLocaleDateString() }}
@@ -131,6 +127,7 @@ export default {
             this.accounts.forEach((account) => {
                 this.totalBalance += account.balance;
             })
+            console.log(this.accounts);
         }
     },
     mounted() {
@@ -205,5 +202,15 @@ export default {
 .transaction-content .v-list-item-subtitle {
     width: 33%;
     text-align: center;
+}
+
+.larger-text {
+    font-size: 2rem;
+    font-weight: bold;
+}
+
+.larger-text-total {
+    font-size: 2.5rem;
+    font-weight: bold;
 }
 </style>
