@@ -64,6 +64,9 @@
                                                 {{ transaction.amount }} €
                                             </v-list-item-title>
                                             <v-list-item-subtitle>
+                                                {{ transaction.accountName }}
+                                            </v-list-item-subtitle>
+                                            <v-list-item-subtitle>
                                                 {{ transaction.description ? transaction.description : 'No description' }}
                                             </v-list-item-subtitle>
                                             <v-list-item-subtitle>
@@ -99,6 +102,13 @@ export default {
         latestTransactions() {
             return this.transactions
                 .filter(transaction => transaction.transactionType !== 0)
+                .map(transaction => {
+                    const account = this.accounts.find(account => account.transactions.some(accTransaction => accTransaction.id === transaction.id));
+                    return {
+                        ...transaction,
+                        accountName: account ? account.name : 'Unknown'
+                    };
+                })
                 .sort((a, b) => new Date(b.date) - new Date(a.date))
                 .slice(0, 3);
         }
@@ -123,8 +133,7 @@ export default {
             this.totalBalance = 0;
             this.accounts.forEach((account) => {
                 this.totalBalance += account.balance;
-            })
-            console.log(this.accounts);
+            });
         }
     },
     mounted() {
