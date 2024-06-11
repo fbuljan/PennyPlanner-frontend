@@ -24,7 +24,7 @@
                 </v-col>
             </v-row>
             <v-row>
-                <v-col cols="12" md="7" class="py-2">
+                <v-col cols="12" md="6" class="py-2">
                     <v-row>
                         <v-col cols="12" class="my-2">
                             <v-card class="rectangle">
@@ -50,7 +50,7 @@
                         </v-col>
                     </v-row>
                 </v-col>
-                <v-col cols="12" md="5" class="py-2">
+                <v-col cols="12" md="6" class="py-2">
                     <v-row>
                         <v-col cols="12" class="my-2">
                             <v-card class="rectangle">
@@ -171,11 +171,11 @@
 }
 
 .transaction-content {
-    display: flex;
-    flex-direction: row;
-    justify-content: space-between;
+    display: grid;
+    grid-template-columns: 25% 30% 30% 15%;
+    justify-content: start;
+    justify-items: start;
     width: 100%;
-    align-items: center;
 }
 
 .transaction-content .transaction-title,
@@ -194,7 +194,7 @@
 }
 
 .larger-text-transaction {
-    font-size: 1.25rem;
+    font-size: 1.15rem;
     font-weight: bold;
     padding-bottom: 2px;
     line-height: 1.5;
