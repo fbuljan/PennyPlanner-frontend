@@ -54,7 +54,7 @@
                                 <v-list dense style="background-color: #f5f5f5;">
                                     <v-list-item v-for="transaction in latestTransactions" :key="transaction.id" class="transaction-item">
                                         <v-list-item-content class="transaction-content">
-                                            <v-list-item-title class="transaction-title">
+                                            <v-list-item-title class="transaction-title" :style="transaction.transactionType < 0 ? 'color: red;' : 'color: green;'">
                                                 <template v-if="transaction.transactionType < 0">
                                                     <v-icon color="red">mdi-arrow-down</v-icon>
                                                 </template>
@@ -63,13 +63,13 @@
                                                 </template>
                                                 {{ transaction.amount }} €
                                             </v-list-item-title>
-                                            <v-list-item-subtitle>
+                                            <v-list-item-subtitle class="larger-text-transaction">
                                                 {{ transaction.accountName }}
                                             </v-list-item-subtitle>
-                                            <v-list-item-subtitle>
+                                            <v-list-item-subtitle class="larger-text-transaction">
                                                 {{ transaction.description ? transaction.description : 'No description' }}
                                             </v-list-item-subtitle>
-                                            <v-list-item-subtitle>
+                                            <v-list-item-subtitle class="larger-text-transaction">
                                                 {{ new Date(transaction.date).toLocaleDateString() }}
                                             </v-list-item-subtitle>
                                         </v-list-item-content>
@@ -86,6 +86,94 @@
         </v-container>
     </div>
 </template>
+
+<style>
+.rectangle {
+    min-height: 250px;
+    padding: 0.5vh;
+    display: flex;
+    flex-direction: column;
+    background-color: #f5f5f5;
+    border: 1px solid #ddd;
+    border-radius: 12px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.v-card-title {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #1867c0;
+    text-align: center;
+}
+
+.v-card-subtitle.display-4 {
+    font-size: 2.5rem;
+    font-weight: bold;
+    text-align: center;
+}
+
+.v-card-text {
+    font-size: 1.2rem;
+}
+
+.d-flex.align-center.justify-center {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
+
+.account-item {
+    margin-bottom: 0px;
+}
+
+.welcome-text {
+    margin: 0;
+    text-align: left;
+    width: 100%;
+}
+
+.transaction-item {
+    width: 100%;
+}
+
+.transaction-title {
+    display: flex;
+    align-items: center;
+    font-size: 1.25rem;
+    font-weight: bold;
+}
+
+.transaction-content {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    width: 100%;
+    align-items: center;
+}
+
+.transaction-content .transaction-title,
+.transaction-content .v-list-item-subtitle {
+    text-align: center;
+}
+
+.larger-text {
+    font-size: 2rem;
+    font-weight: bold;
+}
+
+.larger-text-total {
+    font-size: 2.5rem;
+    font-weight: bold;
+}
+
+.larger-text-transaction {
+    font-size: 1.25rem;
+    font-weight: bold;
+    padding-bottom: 2px;
+    line-height: 1.5;
+}
+</style>
 
 <script>
 export default {
@@ -141,82 +229,3 @@ export default {
     },
 };
 </script>
-
-<style>
-.rectangle {
-    min-height: 250px;
-    padding: 0.5vh;
-    display: flex;
-    flex-direction: column;
-    background-color: #f5f5f5;
-    border: 1px solid #ddd;
-    border-radius: 12px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-.v-card-title {
-    font-size: 1.5rem;
-    font-weight: bold;
-    color: #1867c0;
-    text-align: center;
-}
-
-.v-card-subtitle.display-4 {
-    font-size: 2.5rem;
-    font-weight: bold;
-    text-align: center;
-}
-
-.v-card-text {
-    font-size: 1.2rem;
-}
-
-.d-flex.align-center.justify-center {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-}
-
-.account-item {
-    margin-bottom: 0px;
-}
-
-.welcome-text {
-    margin: 0;
-    text-align: left;
-    width: 100%;
-}
-
-.transaction-item {
-    width: 100%;
-}
-
-.transaction-title {
-    display: flex;
-    align-items: center;
-}
-
-.transaction-content {
-    display: flex;
-    flex-direction: row;
-    justify-content: space-between;
-    width: 100%;
-}
-
-.transaction-content .transaction-title,
-.transaction-content .v-list-item-subtitle {
-    width: 33%;
-    text-align: center;
-}
-
-.larger-text {
-    font-size: 2rem;
-    font-weight: bold;
-}
-
-.larger-text-total {
-    font-size: 2.5rem;
-    font-weight: bold;
-}
-</style>
