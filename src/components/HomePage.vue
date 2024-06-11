@@ -31,11 +31,15 @@
                                 <v-row style="width: 100%">
                                     <v-col cols="12" md="6" class="d-flex flex-column align-center justify-center">
                                         <v-card-title class="larger-text-total">Current balance:</v-card-title>
-                                        <v-card-subtitle class="larger-text-total display-4 text--primary">{{ totalBalance }} €</v-card-subtitle>
+                                        <v-card-subtitle class="larger-text-total display-4 text--primary">{{
+                                            totalBalance }} €</v-card-subtitle>
                                     </v-col>
-                                    <v-col cols="12" md="6" class="d-flex flex-column" style="max-height: 250px; overflow-y: auto;">
-                                        <v-card-text v-for="account in accounts" :key="account.name" class="account-item larger-text">
-                                            <strong :style="{ color: '#1867c0' }">{{ account.name }}:</strong> {{ account.balance }} €
+                                    <v-col cols="12" md="6" class="d-flex flex-column"
+                                        style="max-height: 250px; overflow-y: auto;">
+                                        <v-card-text v-for="account in accounts" :key="account.name"
+                                            class="account-item larger-text">
+                                            <strong :style="{ color: '#1867c0' }">{{ account.name }}:</strong> {{
+                                            account.balance }} €
                                         </v-card-text>
                                     </v-col>
                                 </v-row>
@@ -52,9 +56,11 @@
                             <v-card class="rectangle">
                                 <v-card-title>Last 3 transactions</v-card-title>
                                 <v-list dense style="background-color: #f5f5f5;">
-                                    <v-list-item v-for="transaction in latestTransactions" :key="transaction.id" class="transaction-item">
+                                    <v-list-item v-for="transaction in latestTransactions" :key="transaction.id"
+                                        class="transaction-item">
                                         <v-list-item-content class="transaction-content">
-                                            <v-list-item-title class="transaction-title" :style="transaction.transactionType < 0 ? 'color: red;' : 'color: green;'">
+                                            <v-list-item-title class="transaction-title"
+                                                :style="transaction.transactionType < 0 ? 'color: red;' : 'color: green;'">
                                                 <template v-if="transaction.transactionType < 0">
                                                     <v-icon color="red">mdi-arrow-down</v-icon>
                                                 </template>
@@ -67,7 +73,8 @@
                                                 {{ transaction.accountName }}
                                             </v-list-item-subtitle>
                                             <v-list-item-subtitle class="larger-text-transaction">
-                                                {{ transaction.description ? transaction.description : 'No description' }}
+                                                {{ transaction.description ? transaction.description : 'No description'
+                                                }}
                                             </v-list-item-subtitle>
                                             <v-list-item-subtitle class="larger-text-transaction">
                                                 {{ new Date(transaction.date).toLocaleDateString() }}
@@ -78,7 +85,26 @@
                             </v-card>
                         </v-col>
                         <v-col cols="12" class="my-2">
-                            <v-card class="rectangle">Stats</v-card>
+                            <v-card class="rectangle">
+                                <v-card-title>Stats</v-card-title>
+                                <v-card-text>
+                                    <div class="stats-item">
+                                        <strong>Most used account:</strong> {{ mostUsedAccount.name }} ({{
+                                        mostUsedAccount.transactions.length
+                                        }} transactions)
+                                    </div>
+                                    <div class="stats-item">
+                                        <strong>Most common transaction category:</strong> {{ categoryName }}
+                                    </div>
+                                    <div class="stats-item">
+                                        <strong>Average monthly income:</strong> {{ averageMonthlyIncome.toFixed(2) }} €
+                                    </div>
+                                    <div class="stats-item">
+                                        <strong>Average monthly expenditure:</strong> {{
+                                        averageMonthlyExpenditure.toFixed(2) }} €
+                                    </div>
+                                </v-card-text>
+                            </v-card>
                         </v-col>
                     </v-row>
                 </v-col>
@@ -173,6 +199,10 @@
     padding-bottom: 2px;
     line-height: 1.5;
 }
+
+.stats-item {
+    margin-bottom: 10px;
+}
 </style>
 
 <script>
@@ -183,7 +213,13 @@ export default {
             userName: '',
             totalBalance: 0,
             accounts: [],
-            transactions: []
+            transactions: [],
+            categories: [],
+            mostUsedAccount: { name: 'None', transactions: [] },
+            mostCommonCategory: 'None',
+            categoryName: "",
+            averageMonthlyIncome: 0,
+            averageMonthlyExpenditure: 0
         };
     },
     computed: {
@@ -205,10 +241,11 @@ export default {
         async fetchUser() {
             const userId = localStorage.getItem('id');
             const userResponse = await this.$axios.get('/api/User/get/' + userId);
-            console.log(userResponse);
             this.userName = userResponse.data.name;
             this.handleAccountsData(userResponse);
             this.transactions = userResponse.data.transactions || [];
+            await this.handleCategories();
+            this.computeStats();
         },
         getUserDisplayName() {
             if (this.userName.length === 0) {
@@ -222,6 +259,51 @@ export default {
             this.accounts.forEach((account) => {
                 this.totalBalance += account.balance;
             });
+        },
+        async handleCategories() {
+            const categoriesResponse = await this.$axios.get('/api/Transaction/categories/');
+            this.categories = categoriesResponse.data;
+            console.log(this.categories)
+        },
+        computeStats() {
+            if (this.accounts.length === 0 || this.transactions.length === 0) return;
+
+            // Most used account
+            let maxTransactions = 0;
+            this.accounts.forEach(account => {
+                if (account.transactions.length > maxTransactions) {
+                    maxTransactions = account.transactions.length;
+                    this.mostUsedAccount = account;
+                }
+            });
+
+            // Most common transaction category
+            const categoryCount = {};
+            this.transactions.forEach(transaction => {
+                if (!categoryCount[transaction.transactionCategory]) {
+                    categoryCount[transaction.transactionCategory] = 0;
+                }
+                categoryCount[transaction.transactionCategory]++;
+            });
+            this.mostCommonCategory = Object.keys(categoryCount).reduce((a, b) => categoryCount[a] > categoryCount[b] ? a : b);
+            this.categoryName = this.getCategoryName(this.mostCommonCategory);
+
+            // Average monthly income and expenditure
+            const incomeTransactions = this.transactions.filter(t => t.transactionType === 1);
+            const expenditureTransactions = this.transactions.filter(t => t.transactionType === -1);
+
+            const months = new Set(this.transactions.map(t => new Date(t.date).getMonth() + "-" + new Date(t.date).getFullYear())).size;
+            this.averageMonthlyIncome = incomeTransactions.reduce((acc, t) => acc + t.amount, 0) / months;
+            this.averageMonthlyExpenditure = expenditureTransactions.reduce((acc, t) => acc + t.amount, 0) / months;
+        },
+        getCategoryName(categoryId) {
+            for (let i = 0; i < this.categories.length; i++) {
+                if (this.categories[i].value == categoryId) {
+                    console.log(this.categories[i].name)
+                    return this.categories[i].name;
+                }
+            }
+            return null;
         }
     },
     mounted() {
