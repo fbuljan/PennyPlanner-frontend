@@ -113,7 +113,7 @@
 
         <v-dialog v-model="showTransactionsWindow" persistent max-width="800px">
             <v-card>
-                <v-card-title class="window-title">History</v-card-title>
+                <v-card-title class="window-title">Transactions history</v-card-title>
                 <v-card-text>
                     <v-row>
                         <v-col cols="12" md="6">
@@ -166,7 +166,7 @@
                     <v-row>
                         <v-col cols="12">
                             <v-card class="rectangle">
-                                <v-card-title>Stats</v-card-title>
+                                <v-card-title>Period stats</v-card-title>
                                 <v-card-text>
                                     <div class="stats-item">
                                         <strong>Most used account:</strong> {{ filteredMostUsedAccount.name }} ({{
@@ -508,6 +508,6 @@ export default {
 .transaction-item .v-btn {
     max-width: 30px;
     max-height: 30px;
-    padding: 0;
+    padding: 5%;
 }
 </style>
