@@ -150,7 +150,11 @@
                                         <v-list-item-subtitle class="larger-text-transaction">
                                             {{ new Date(transaction.date).toLocaleDateString() }}
                                         </v-list-item-subtitle>
-                                        <v-list-item-action>
+                                        <v-list-item-action class="transaction-item">
+                                            <v-btn v-if="transaction.transactionType === 0" icon small
+                                                @click="applyTemplate(transaction)">
+                                                <v-icon>mdi-check</v-icon>
+                                            </v-btn>
                                             <v-btn icon small @click="editTransaction(transaction)">
                                                 <v-icon>mdi-pencil</v-icon>
                                             </v-btn>
@@ -163,7 +167,7 @@
                             </v-list>
                         </v-col>
                     </v-row>
-                    <v-row>
+                    <v-row v-if="!filtersApplied">
                         <v-col cols="12">
                             <v-card class="rectangle">
                                 <v-card-title>Period stats</v-card-title>
@@ -194,8 +198,42 @@
                 <v-card-actions>
                     <v-btn color="blue darken-1" text @click="showTransactionsWindow = false">Cancel</v-btn>
                     <v-spacer></v-spacer>
+                    <v-btn color="blue darken-1" text @click="showFilterWindow = true">Filter</v-btn>
                     <v-btn color="blue darken-1" text @click="addTransaction">Add</v-btn>
-                    <v-btn color="blue darken-1" text @click="filterTransactions">Filter</v-btn>
+                </v-card-actions>
+            </v-card>
+        </v-dialog>
+
+        <v-dialog v-model="showFilterWindow" persistent max-width="400px">
+            <v-card>
+                <v-card-title class="window-title">Filter Transactions</v-card-title>
+                <v-card-text>
+                    <v-row>
+                        <v-col cols="12" class="d-flex">
+                            <v-select v-model="filterAccount" :items="accountOptions" label="Account"
+                                class="flex-grow-1"></v-select>
+                            <v-btn icon @click="clearFilter('account')">
+                                <v-icon>mdi-close</v-icon>
+                            </v-btn>
+                        </v-col>
+                        <v-col cols="12" class="d-flex">
+                            <v-select v-model="filterCategory" :items="categoryOptions" label="Category"
+                                class="flex-grow-1"></v-select>
+                            <v-btn icon @click="clearFilter('category')">
+                                <v-icon>mdi-close</v-icon>
+                            </v-btn>
+                        </v-col>
+                        <v-col cols="12" class="d-flex">
+                            <v-select v-model="filterTransactionType" :items="transactionTypeOptions"
+                                label="Transaction Type" class="flex-grow-1"></v-select>
+                            <v-btn icon @click="clearFilter('transactionType')">
+                                <v-icon>mdi-close</v-icon>
+                            </v-btn>
+                        </v-col>
+                    </v-row>
+                </v-card-text>
+                <v-card-actions>
+                    <v-btn color="blue darken-1" text @click="showFilterWindow = false">Close</v-btn>
                 </v-card-actions>
             </v-card>
         </v-dialog>
@@ -222,11 +260,22 @@ export default {
             averageMonthlyIncome: 0,
             averageMonthlyExpenditure: 0,
             showTransactionsWindow: false,
+            showFilterWindow: false,
             filterPeriodStart: '',
-            filterPeriodEnd: ''
+            filterPeriodEnd: '',
+            filterAccount: '',
+            filterCategory: '',
+            filterTransactionType: '',
+            transactionTypeOptions: ['Income', 'Expense', 'Template']
         };
     },
     computed: {
+        accountOptions() {
+            return this.accounts.map(account => account.name);
+        },
+        categoryOptions() {
+            return this.categories.map(category => category.name);
+        },
         latestTransactions() {
             return this.transactions
                 .filter(transaction => transaction.transactionType !== 0)
@@ -240,8 +289,11 @@ export default {
                 .sort((a, b) => new Date(b.date) - new Date(a.date))
                 .slice(0, 3);
         },
+        filtersApplied() {
+            return this.filterAccount !== '' || this.filterCategory !== '' || this.filterTransactionType !== '';
+        },
         filteredTransactions() {
-            if (!this.filterPeriodStart || !this.filterPeriodEnd) {
+            if ((!this.filterPeriodStart || !this.filterPeriodEnd) && this.filterTransactionType !== 'Template') {
                 return [];
             }
             const startDate = new Date(this.filterPeriodStart);
@@ -249,7 +301,30 @@ export default {
             return this.transactions
                 .filter(transaction => {
                     const transactionDate = new Date(transaction.date);
-                    return transaction.transactionType !== 0 && transactionDate >= startDate && transactionDate <= endDate;
+                    let matchesFilters = this.filterTransactionType === 'Template' ? transaction.transactionType === 0 :
+                        transaction.transactionType !== 0 && transactionDate >= startDate && transactionDate <= endDate;
+
+                    if (this.filterAccount) {
+                        const account = this.accounts.find(account => account.transactions.some(accTransaction => accTransaction.id === transaction.id));
+                        matchesFilters = matchesFilters && account && account.name === this.filterAccount;
+                    }
+                    if (this.filterCategory) {
+                        const category = this.categories.find(category => category.name === this.filterCategory);
+                        if (category) {
+                            matchesFilters = matchesFilters && transaction.transactionCategory === category.value;
+                        } else {
+                            matchesFilters = false;
+                        }
+                    }
+                    if (this.filterTransactionType) {
+                        let transactionTypeValue;
+                        if (this.filterTransactionType === 'Income') transactionTypeValue = 1;
+                        else if (this.filterTransactionType === 'Expense') transactionTypeValue = -1;
+                        else if (this.filterTransactionType === 'Template') transactionTypeValue = 0;
+
+                        matchesFilters = matchesFilters && transaction.transactionType === transactionTypeValue;
+                    }
+                    return matchesFilters;
                 })
                 .map(transaction => {
                     const account = this.accounts.find(account => account.transactions.some(accTransaction => accTransaction.id === transaction.id));
@@ -322,7 +397,6 @@ export default {
         async handleCategories() {
             const categoriesResponse = await this.$axios.get('/api/Transaction/categories/');
             this.categories = categoriesResponse.data;
-            console.log(this.categories)
         },
         computeStats() {
             if (this.accounts.length === 0 || this.transactions.length === 0) return;
@@ -358,7 +432,6 @@ export default {
         getCategoryName(categoryId) {
             for (let i = 0; i < this.categories.length; i++) {
                 if (this.categories[i].value == categoryId) {
-                    console.log(this.categories[i].name)
                     return this.categories[i].name;
                 }
             }
@@ -368,13 +441,25 @@ export default {
             // Add transaction logic
         },
         filterTransactions() {
-            // Filter transactions logic
+            this.showFilterWindow = false;
+        },
+        clearFilter(filterType) {
+            if (filterType === 'account') {
+                this.filterAccount = '';
+            } else if (filterType === 'category') {
+                this.filterCategory = '';
+            } else if (filterType === 'transactionType') {
+                this.filterTransactionType = '';
+            }
         },
         editTransaction() {
             // Edit transaction logic
         },
         deleteTransaction() {
             // Delete transaction logic
+        },
+        applyTemplate(transaction) {
+            console.log(transaction)
         }
     },
     mounted() {
@@ -499,7 +584,7 @@ export default {
 
 .transactions-content {
     display: grid;
-    grid-template-columns: 20% 20% 30% 22% 8%;
+    grid-template-columns: 15% 25% 25% 15% 20%;
     justify-content: start;
     justify-items: start;
     width: 100%;
@@ -509,5 +594,15 @@ export default {
     max-width: 30px;
     max-height: 30px;
     padding: 5%;
+}
+
+.transaction-item .v-list-item-action {
+    display: flex;
+    justify-content: flex-end;
+    width: 100%;
+}
+
+.transaction-item .v-list-item-action .v-btn {
+    margin-left: 8px;
 }
 </style>
