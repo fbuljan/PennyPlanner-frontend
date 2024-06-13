@@ -31,15 +31,11 @@
                                 <v-row style="width: 100%">
                                     <v-col cols="12" md="6" class="d-flex flex-column align-center justify-center">
                                         <v-card-title class="larger-text-total">Current balance:</v-card-title>
-                                        <v-card-subtitle class="larger-text-total display-4 text--primary">{{
-                                            totalBalance }} €</v-card-subtitle>
+                                        <v-card-subtitle class="larger-text-total display-4 text--primary">{{ totalBalance }} €</v-card-subtitle>
                                     </v-col>
-                                    <v-col cols="12" md="6" class="d-flex flex-column"
-                                        style="max-height: 250px; overflow-y: auto;">
-                                        <v-card-text v-for="account in accounts" :key="account.name"
-                                            class="account-item larger-text">
-                                            <strong :style="{ color: '#1867c0' }">{{ account.name }}:</strong> {{
-                                                account.balance }} €
+                                    <v-col cols="12" md="6" class="d-flex flex-column" style="max-height: 250px; overflow-y: auto;">
+                                        <v-card-text v-for="account in accounts" :key="account.name" class="account-item larger-text">
+                                            <strong :style="{ color: '#1867c0' }">{{ account.name }}:</strong> {{ account.balance }} €
                                         </v-card-text>
                                     </v-col>
                                 </v-row>
@@ -56,11 +52,9 @@
                             <v-card class="rectangle">
                                 <v-card-title>Last 3 transactions</v-card-title>
                                 <v-list dense style="background-color: #f5f5f5;">
-                                    <v-list-item v-for="transaction in latestTransactions" :key="transaction.id"
-                                        class="transaction-item">
+                                    <v-list-item v-for="transaction in latestTransactions" :key="transaction.id" class="transaction-item">
                                         <v-list-item-content class="transaction-content">
-                                            <v-list-item-title class="transaction-title"
-                                                :style="transaction.transactionType < 0 ? 'color: red;' : 'color: green;'">
+                                            <v-list-item-title class="transaction-title" :style="transaction.transactionType < 0 ? 'color: red;' : 'color: green;'">
                                                 <template v-if="transaction.transactionType < 0">
                                                     <v-icon color="red">mdi-arrow-down</v-icon>
                                                 </template>
@@ -73,13 +67,12 @@
                                                 {{ transaction.accountName }}
                                             </v-list-item-subtitle>
                                             <v-list-item-subtitle class="larger-text-transaction">
-                                                {{ transaction.description ? transaction.description : 'No description'
-                                                }}
+                                                {{ transaction.description ? transaction.description : 'No description' }}
                                             </v-list-item-subtitle>
                                             <v-list-item-subtitle class="larger-text-transaction">
                                                 {{ new Date(transaction.date).toLocaleDateString() }}
                                             </v-list-item-subtitle>
-                                        </v-list-item-content>
+                                            </v-list-item-content>
                                     </v-list-item>
                                 </v-list>
                             </v-card>
@@ -89,9 +82,7 @@
                                 <v-card-title>Stats</v-card-title>
                                 <v-card-text>
                                     <div class="stats-item">
-                                        <strong>Most used account:</strong> {{ mostUsedAccount.name }} ({{
-                                            mostUsedAccount.transactions.length
-                                        }} transactions)
+                                        <strong>Most used account:</strong> {{ mostUsedAccount.name }} ({{ mostUsedAccount.transactions.length }} transactions)
                                     </div>
                                     <div class="stats-item">
                                         <strong>Most common transaction category:</strong> {{ categoryName }}
@@ -100,8 +91,7 @@
                                         <strong>Average monthly income:</strong> {{ averageMonthlyIncome.toFixed(2) }} €
                                     </div>
                                     <div class="stats-item">
-                                        <strong>Average monthly expenditure:</strong> {{
-                                            averageMonthlyExpenditure.toFixed(2) }} €
+                                        <strong>Average monthly expenditure:</strong> {{ averageMonthlyExpenditure.toFixed(2) }} €
                                     </div>
                                 </v-card-text>
                             </v-card>
@@ -111,132 +101,23 @@
             </v-row>
         </v-container>
 
-        <v-dialog v-model="showTransactionsWindow" persistent max-width="800px">
-            <v-card>
-                <v-card-title class="window-title">Transactions history</v-card-title>
-                <v-card-text>
-                    <v-row>
-                        <v-col cols="12" md="6">
-                            <v-text-field v-model="filterPeriodStart" label="From" type="date"
-                                prepend-icon="mdi-calendar"></v-text-field>
-                        </v-col>
-                        <v-col cols="12" md="6">
-                            <v-text-field v-model="filterPeriodEnd" label="To" type="date"
-                                prepend-icon="mdi-calendar"></v-text-field>
-                        </v-col>
-                    </v-row>
-                    <v-row>
-                        <v-col cols="12">
-                            <v-list dense class="scrollable-transactions">
-                                <v-list-item v-for="transaction in filteredTransactions" :key="transaction.id"
-                                    class="transaction-item">
-                                    <v-list-item-content class="transactions-content">
-                                        <v-list-item-title class="transaction-title"
-                                            :style="transaction.transactionType < 0 ? 'color: red;' : 'color: green;'">
-                                            <template v-if="transaction.transactionType < 0">
-                                                <v-icon color="red">mdi-arrow-down</v-icon>
-                                            </template>
-                                            <template v-else-if="transaction.transactionType === 1">
-                                                <v-icon color="green">mdi-arrow-up</v-icon>
-                                            </template>
-                                            {{ transaction.amount }} €
-                                        </v-list-item-title>
-                                        <v-list-item-subtitle class="larger-text-transaction">
-                                            {{ transaction.accountName }}
-                                        </v-list-item-subtitle>
-                                        <v-list-item-subtitle class="larger-text-transaction">
-                                            {{ transaction.description ? transaction.description : 'No description' }}
-                                        </v-list-item-subtitle>
-                                        <v-list-item-subtitle class="larger-text-transaction">
-                                            {{ new Date(transaction.date).toLocaleDateString() }}
-                                        </v-list-item-subtitle>
-                                        <v-list-item-action class="transaction-item">
-                                            <v-btn v-if="transaction.transactionType === 0" icon small
-                                                @click="applyTemplate(transaction)">
-                                                <v-icon>mdi-check</v-icon>
-                                            </v-btn>
-                                            <v-btn icon small @click="editTransaction(transaction)">
-                                                <v-icon>mdi-pencil</v-icon>
-                                            </v-btn>
-                                            <v-btn icon small @click="deleteTransaction(transaction.id)">
-                                                <v-icon>mdi-delete</v-icon>
-                                            </v-btn>
-                                        </v-list-item-action>
-                                    </v-list-item-content>
-                                </v-list-item>
-                            </v-list>
-                        </v-col>
-                    </v-row>
-                    <v-row v-if="!filtersApplied">
-                        <v-col cols="12">
-                            <v-card class="rectangle">
-                                <v-card-title>Period stats</v-card-title>
-                                <v-card-text>
-                                    <div class="stats-item">
-                                        <strong>Most used account:</strong> {{ filteredMostUsedAccount.name }} ({{
-                                            filteredMostUsedAccount.transactions.length }} transactions)
-                                    </div>
-                                    <div class="stats-item">
-                                        <strong>Transaction categories:</strong>
-                                        <div v-for="(count, category) in filteredCategoryCounts" :key="category">
-                                            {{ getCategoryName(category) }}: {{ count }}
-                                        </div>
-                                    </div>
-                                    <div class="stats-item" v-if="!isNaN(filteredTotalIncome)">
-                                        <strong>Total income for period:</strong> {{ filteredTotalIncome.toFixed(2) }} €
-                                    </div>
-                                    <div class="stats-item" v-if="!isNaN(filteredTotalExpenditure)">
-                                        <strong>Total expenditure for period:</strong> {{
-                                            filteredTotalExpenditure.toFixed(2) }}
-                                        €
-                                    </div>
-                                </v-card-text>
-                            </v-card>
-                        </v-col>
-                    </v-row>
-                </v-card-text>
-                <v-card-actions>
-                    <v-btn color="blue darken-1" text @click="showTransactionsWindow = false">Cancel</v-btn>
-                    <v-spacer></v-spacer>
-                    <v-btn color="blue darken-1" text @click="showFilterWindow = true">Filter</v-btn>
-                    <v-btn color="blue darken-1" text @click="addTransaction">Add</v-btn>
-                </v-card-actions>
-            </v-card>
-        </v-dialog>
-
-        <v-dialog v-model="showFilterWindow" persistent max-width="400px">
-            <v-card>
-                <v-card-title class="window-title">Filter Transactions</v-card-title>
-                <v-card-text>
-                    <v-row>
-                        <v-col cols="12" class="d-flex">
-                            <v-select v-model="filterAccount" :items="accountOptions" label="Account"
-                                class="flex-grow-1"></v-select>
-                            <v-btn icon @click="clearFilter('account')">
-                                <v-icon>mdi-close</v-icon>
-                            </v-btn>
-                        </v-col>
-                        <v-col cols="12" class="d-flex">
-                            <v-select v-model="filterCategory" :items="categoryOptions" label="Category"
-                                class="flex-grow-1"></v-select>
-                            <v-btn icon @click="clearFilter('category')">
-                                <v-icon>mdi-close</v-icon>
-                            </v-btn>
-                        </v-col>
-                        <v-col cols="12" class="d-flex">
-                            <v-select v-model="filterTransactionType" :items="transactionTypeOptions"
-                                label="Transaction Type" class="flex-grow-1"></v-select>
-                            <v-btn icon @click="clearFilter('transactionType')">
-                                <v-icon>mdi-close</v-icon>
-                            </v-btn>
-                        </v-col>
-                    </v-row>
-                </v-card-text>
-                <v-card-actions>
-                    <v-btn color="blue darken-1" text @click="showFilterWindow = false">Close</v-btn>
-                </v-card-actions>
-            </v-card>
-        </v-dialog>
+        <TransactionsWindow
+            v-model:showTransactionsWindow="showTransactionsWindow"
+            :transactions="transactions"
+            :accounts="accounts"
+            :categories="categories"
+            :filterPeriodStart="filterPeriodStart"
+            :filterPeriodEnd="filterPeriodEnd"
+            :filterAccount="filterAccount"
+            :filterCategory="filterCategory"
+            :filterTransactionType="filterTransactionType"
+            @apply-template="applyTemplate"
+            @edit-transaction="editTransaction"
+            @delete-transaction="deleteTransaction"
+            @close-transactions-window="showTransactionsWindow = false"
+            @add-transaction="addTransaction"
+            @clear-filter="clearFilter"
+        />
 
         <v-overlay :value="showTransactionsWindow">
             <div class="blur-background"></div>
@@ -245,8 +126,13 @@
 </template>
 
 <script>
+import TransactionsWindow from './TransactionsWindow.vue';
+
 export default {
     name: 'HomePage',
+    components: {
+        TransactionsWindow
+    },
     data() {
         return {
             userName: '',
@@ -260,7 +146,6 @@ export default {
             averageMonthlyIncome: 0,
             averageMonthlyExpenditure: 0,
             showTransactionsWindow: false,
-            showFilterWindow: false,
             filterPeriodStart: '',
             filterPeriodEnd: '',
             filterAccount: '',
@@ -288,87 +173,6 @@ export default {
                 })
                 .sort((a, b) => new Date(b.date) - new Date(a.date))
                 .slice(0, 3);
-        },
-        filtersApplied() {
-            return this.filterAccount !== '' || this.filterCategory !== '' || this.filterTransactionType !== '';
-        },
-        filteredTransactions() {
-            if ((!this.filterPeriodStart || !this.filterPeriodEnd) && this.filterTransactionType !== 'Template') {
-                return [];
-            }
-            const startDate = new Date(this.filterPeriodStart);
-            const endDate = new Date(this.filterPeriodEnd);
-            return this.transactions
-                .filter(transaction => {
-                    const transactionDate = new Date(transaction.date);
-                    let matchesFilters = this.filterTransactionType === 'Template' ? transaction.transactionType === 0 :
-                        transaction.transactionType !== 0 && transactionDate >= startDate && transactionDate <= endDate;
-
-                    if (this.filterAccount) {
-                        const account = this.accounts.find(account => account.transactions.some(accTransaction => accTransaction.id === transaction.id));
-                        matchesFilters = matchesFilters && account && account.name === this.filterAccount;
-                    }
-                    if (this.filterCategory) {
-                        const category = this.categories.find(category => category.name === this.filterCategory);
-                        if (category) {
-                            matchesFilters = matchesFilters && transaction.transactionCategory === category.value;
-                        } else {
-                            matchesFilters = false;
-                        }
-                    }
-                    if (this.filterTransactionType) {
-                        let transactionTypeValue;
-                        if (this.filterTransactionType === 'Income') transactionTypeValue = 1;
-                        else if (this.filterTransactionType === 'Expense') transactionTypeValue = -1;
-                        else if (this.filterTransactionType === 'Template') transactionTypeValue = 0;
-
-                        matchesFilters = matchesFilters && transaction.transactionType === transactionTypeValue;
-                    }
-                    return matchesFilters;
-                })
-                .map(transaction => {
-                    const account = this.accounts.find(account => account.transactions.some(accTransaction => accTransaction.id === transaction.id));
-                    return {
-                        ...transaction,
-                        accountName: account ? account.name : 'Unknown'
-                    };
-                });
-        },
-        filteredMostUsedAccount() {
-            const accountTransactionCounts = this.accounts.reduce((acc, account) => {
-                acc[account.name] = account.transactions.filter(transaction => {
-                    const transactionDate = new Date(transaction.date);
-                    return transaction.transactionType !== 0 && transactionDate >= new Date(this.filterPeriodStart) && transactionDate <= new Date(this.filterPeriodEnd);
-                }).length;
-                return acc;
-            }, {});
-
-            const mostUsedAccountName = Object.keys(accountTransactionCounts).reduce((a, b) => {
-                return accountTransactionCounts[a] > accountTransactionCounts[b] ? a : b;
-            }, null);
-
-            if (!mostUsedAccountName || accountTransactionCounts[mostUsedAccountName] === 0) {
-                return { name: 'None', transactions: [] };
-            }
-
-            return this.accounts.find(account => account.name === mostUsedAccountName) || { name: 'None', transactions: [] };
-        },
-        filteredCategoryCounts() {
-            return this.filteredTransactions.reduce((acc, transaction) => {
-                if (!acc[transaction.transactionCategory]) {
-                    acc[transaction.transactionCategory] = 0;
-                }
-                acc[transaction.transactionCategory]++;
-                return acc;
-            }, {});
-        },
-        filteredTotalIncome() {
-            const incomeTransactions = this.filteredTransactions.filter(t => t.transactionType === 1);
-            return incomeTransactions.reduce((acc, t) => acc + t.amount, 0);
-        },
-        filteredTotalExpenditure() {
-            const expenditureTransactions = this.filteredTransactions.filter(t => t.transactionType === -1);
-            return expenditureTransactions.reduce((acc, t) => acc + t.amount, 0);
         }
     },
     methods: {
@@ -440,9 +244,6 @@ export default {
         addTransaction() {
             // Add transaction logic
         },
-        filterTransactions() {
-            this.showFilterWindow = false;
-        },
         clearFilter(filterType) {
             if (filterType === 'account') {
                 this.filterAccount = '';
@@ -452,11 +253,11 @@ export default {
                 this.filterTransactionType = '';
             }
         },
-        editTransaction() {
-            // Edit transaction logic
+        editTransaction(transaction) {
+            console.log(transaction.window)
         },
-        deleteTransaction() {
-            // Delete transaction logic
+        deleteTransaction(transactionId) {
+            console.log(transactionId)
         },
         applyTemplate(transaction) {
             console.log(transaction)
