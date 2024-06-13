@@ -24,7 +24,7 @@
                                 <v-list-item-content class="transactions-content">
                                     <v-list-item-title class="transaction-title"
                                         :style="transaction.transactionType == 0 ? 'color: black;' : transaction.transactionType < 0 ? 'color: red;' : 'color: green;'">
-                                        <template v-if="transaction.transactionType < 0">
+                                        <template v-if="transaction.transactionType === -1">
                                             <v-icon color="red">mdi-arrow-down</v-icon>
                                         </template>
                                         <template v-else-if="transaction.transactionType === 1">
@@ -332,7 +332,23 @@ export default {
     },
     methods: {
         applyTemplate(transaction) {
-            this.$emit('apply-template', transaction);
+            let otherAccountName = null;
+
+            if (transaction.otherAccountId !== null) {
+                otherAccountName = this.accounts.find(account => account.id === transaction.otherAccountId).name;
+            }
+
+            const category = this.categories.find(category => category.value === transaction.transactionCategory).name;
+
+            this.newTransaction = {
+                accountName: transaction.accountName,
+                amount: transaction.amount,
+                description: transaction.description,
+                transactionCategory: category,
+                otherAccountName
+            }
+
+            this.showAddTransactionDialog = true;
         },
         editTransaction(transaction) {
             this.$emit('edit-transaction', transaction);
