@@ -65,7 +65,7 @@
                             <v-card-text>
                                 <div class="stats-item">
                                     <strong>Most used account:</strong> {{ filteredMostUsedAccount.name }} ({{
-                                        filteredMostUsedAccount.transactions.length }} transactions)
+                                    filteredMostUsedAccount.transactions.length }} transactions)
                                 </div>
                                 <div class="stats-item">
                                     <strong>Transaction categories:</strong>
@@ -78,7 +78,7 @@
                                 </div>
                                 <div class="stats-item" v-if="!isNaN(filteredTotalExpenditure)">
                                     <strong>Total expenditure for period:</strong> {{
-                                        filteredTotalExpenditure.toFixed(2) }} €
+                                    filteredTotalExpenditure.toFixed(2) }} €
                                 </div>
                             </v-card-text>
                         </v-card>
@@ -166,6 +166,10 @@
                         <v-col cols="12">
                             <v-text-field v-model="newTransaction.description" label="Description"></v-text-field>
                         </v-col>
+                        <v-col cols="12">
+                            <v-select v-model="newTransaction.otherAccountName" :items="accountOptions"
+                                label="Other account" item-text="name" item-value="id"></v-select>
+                        </v-col>
                     </v-row>
                 </v-form>
             </v-card-text>
@@ -209,7 +213,8 @@ export default {
                 date: new Date().toISOString().substr(0, 10),
                 transactionType: null,
                 transactionCategory: null,
-                description: ''
+                description: '',
+                otherAccountName: null
             },
             valid: false,
             alert: {
@@ -366,6 +371,12 @@ export default {
                 const accountId = this.accounts.find(account => account.name === this.newTransaction.accountName).id;
                 const category = this.categories.find(category => category.name === this.newTransaction.transactionCategory);
 
+                let otherAccountId = null;
+
+                if (this.newTransaction.otherAccountName !== null) {
+                    otherAccountId = this.accounts.find(account => account.name === this.newTransaction.otherAccountName).id;
+                }
+
                 let transactionTypeValue;
                 if (this.newTransaction.transactionType === 'Income') transactionTypeValue = 1;
                 else if (this.newTransaction.transactionType === 'Expense') transactionTypeValue = -1;
@@ -377,7 +388,8 @@ export default {
                     date: this.newTransaction.date,
                     transactionType: transactionTypeValue,
                     transactionCategory: category.value,
-                    description: this.newTransaction.description
+                    description: this.newTransaction.description,
+                    otherAccountId
                 };
 
                 this.$axios.post('/api/Transaction/create', payload)
@@ -410,7 +422,8 @@ export default {
                     date: new Date().toISOString().substr(0, 10),
                     transactionType: null,
                     transactionCategory: null,
-                    description: ''
+                    description: '',
+                    otherAccountName: null
                 };
             } catch (error) {
                 console.error(error);
