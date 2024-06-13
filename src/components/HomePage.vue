@@ -101,7 +101,7 @@
             </v-row>
         </v-container>
 
-        <TransactionsWindow
+        <TransactionsWindow @transactionCreated="fetchUser"
             v-model:showTransactionsWindow="showTransactionsWindow"
             :transactions="transactions"
             :accounts="accounts"
@@ -111,12 +111,7 @@
             :filterAccount="filterAccount"
             :filterCategory="filterCategory"
             :filterTransactionType="filterTransactionType"
-            @apply-template="applyTemplate"
-            @edit-transaction="editTransaction"
-            @delete-transaction="deleteTransaction"
             @close-transactions-window="showTransactionsWindow = false"
-            @add-transaction="addTransaction"
-            @clear-filter="clearFilter"
         />
 
         <v-overlay :value="showTransactionsWindow">
@@ -240,27 +235,6 @@ export default {
                 }
             }
             return null;
-        },
-        addTransaction() {
-            // Add transaction logic
-        },
-        clearFilter(filterType) {
-            if (filterType === 'account') {
-                this.filterAccount = '';
-            } else if (filterType === 'category') {
-                this.filterCategory = '';
-            } else if (filterType === 'transactionType') {
-                this.filterTransactionType = '';
-            }
-        },
-        editTransaction(transaction) {
-            console.log(transaction.window)
-        },
-        deleteTransaction(transactionId) {
-            console.log(transactionId)
-        },
-        applyTemplate(transaction) {
-            console.log(transaction)
         }
     },
     mounted() {

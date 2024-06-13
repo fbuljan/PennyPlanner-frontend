@@ -5,18 +5,22 @@
             <v-card-text>
                 <v-row>
                     <v-col cols="12" md="6">
-                        <v-text-field v-model="localFilterPeriodStart" label="From" type="date" prepend-icon="mdi-calendar"></v-text-field>
+                        <v-text-field v-model="localFilterPeriodStart" label="From" type="date"
+                            prepend-icon="mdi-calendar"></v-text-field>
                     </v-col>
                     <v-col cols="12" md="6">
-                        <v-text-field v-model="localFilterPeriodEnd" label="To" type="date" prepend-icon="mdi-calendar"></v-text-field>
+                        <v-text-field v-model="localFilterPeriodEnd" label="To" type="date"
+                            prepend-icon="mdi-calendar"></v-text-field>
                     </v-col>
                 </v-row>
                 <v-row>
                     <v-col cols="12">
                         <v-list dense class="scrollable-transactions">
-                            <v-list-item v-for="transaction in filteredTransactions" :key="transaction.id" class="transaction-item">
+                            <v-list-item v-for="transaction in filteredTransactions" :key="transaction.id"
+                                class="transaction-item">
                                 <v-list-item-content class="transactions-content">
-                                    <v-list-item-title class="transaction-title" :style="transaction.transactionType == 0 ? 'color: black;' : transaction.transactionType < 0 ? 'color: red;' : 'color: green;'">
+                                    <v-list-item-title class="transaction-title"
+                                        :style="transaction.transactionType == 0 ? 'color: black;' : transaction.transactionType < 0 ? 'color: red;' : 'color: green;'">
                                         <template v-if="transaction.transactionType < 0">
                                             <v-icon color="red">mdi-arrow-down</v-icon>
                                         </template>
@@ -35,7 +39,8 @@
                                         {{ new Date(transaction.date).toLocaleDateString() }}
                                     </v-list-item-subtitle>
                                     <v-list-item-action class="transaction-item">
-                                        <v-btn v-if="transaction.transactionType === 0" icon small @click="applyTemplate(transaction)">
+                                        <v-btn v-if="transaction.transactionType === 0" icon small
+                                            @click="applyTemplate(transaction)">
                                             <v-icon>mdi-check</v-icon>
                                         </v-btn>
                                         <v-btn icon small @click="editTransaction(transaction)">
@@ -56,7 +61,8 @@
                             <v-card-title>Period stats</v-card-title>
                             <v-card-text>
                                 <div class="stats-item">
-                                    <strong>Most used account:</strong> {{ filteredMostUsedAccount.name }} ({{ filteredMostUsedAccount.transactions.length }} transactions)
+                                    <strong>Most used account:</strong> {{ filteredMostUsedAccount.name }} ({{
+                                        filteredMostUsedAccount.transactions.length }} transactions)
                                 </div>
                                 <div class="stats-item">
                                     <strong>Transaction categories:</strong>
@@ -68,7 +74,8 @@
                                     <strong>Total income for period:</strong> {{ filteredTotalIncome.toFixed(2) }} €
                                 </div>
                                 <div class="stats-item" v-if="!isNaN(filteredTotalExpenditure)">
-                                    <strong>Total expenditure for period:</strong> {{ filteredTotalExpenditure.toFixed(2) }} €
+                                    <strong>Total expenditure for period:</strong> {{
+                                        filteredTotalExpenditure.toFixed(2) }} €
                                 </div>
                             </v-card-text>
                         </v-card>
@@ -83,7 +90,7 @@
             <v-card-actions>
                 <v-btn color="blue darken-1" text @click="closeTransactionsWindow">Cancel</v-btn>
                 <v-spacer></v-spacer>
-                <v-btn color="blue darken-1" text @click="addTransaction">Add</v-btn>
+                <v-btn color="blue darken-1" text @click="showAddTransactionDialog = true">Add</v-btn>
             </v-card-actions>
         </v-card>
 
@@ -93,19 +100,22 @@
                 <v-card-text>
                     <v-row>
                         <v-col cols="12" class="d-flex">
-                            <v-select v-model="localFilterAccount" :items="accountOptions" label="Account" class="flex-grow-1"></v-select>
+                            <v-select v-model="localFilterAccount" :items="accountOptions" label="Account"
+                                class="flex-grow-1"></v-select>
                             <v-btn icon @click="clearFilter('account')">
                                 <v-icon>mdi-close</v-icon>
                             </v-btn>
                         </v-col>
                         <v-col cols="12" class="d-flex">
-                            <v-select v-model="localFilterCategory" :items="categoryOptions" label="Category" class="flex-grow-1"></v-select>
+                            <v-select v-model="localFilterCategory" :items="categoryOptions" label="Category"
+                                class="flex-grow-1"></v-select>
                             <v-btn icon @click="clearFilter('category')">
                                 <v-icon>mdi-close</v-icon>
                             </v-btn>
                         </v-col>
                         <v-col cols="12" class="d-flex">
-                            <v-select v-model="localFilterTransactionType" :items="transactionTypeOptions" label="Transaction Type" class="flex-grow-1"></v-select>
+                            <v-select v-model="localFilterTransactionType" :items="transactionTypeOptions"
+                                label="Transaction Type" class="flex-grow-1"></v-select>
                             <v-btn icon @click="clearFilter('transactionType')">
                                 <v-icon>mdi-close</v-icon>
                             </v-btn>
@@ -117,6 +127,45 @@
                 </v-card-actions>
             </v-card>
         </v-dialog>
+    </v-dialog>
+
+    <v-dialog v-model="showAddTransactionDialog" persistent max-width="600px">
+        <v-card>
+            <v-card-title class="window-title">Add New Transaction</v-card-title>
+            <v-card-text>
+                <v-form ref="form" v-model="valid" lazy-validation>
+                    <v-row>
+                        <v-col cols="12">
+                            <v-select v-model="newTransaction.accountName" :items="accountOptions" label="Account"
+                                item-text="name" item-value="id" required></v-select>
+                        </v-col>
+                        <v-col cols="12">
+                            <v-text-field v-model="newTransaction.amount" label="Amount" type="number"
+                                required></v-text-field>
+                        </v-col>
+                        <v-col cols="12">
+                            <v-text-field v-model="newTransaction.date" label="Date" type="date"
+                                required></v-text-field>
+                        </v-col>
+                        <v-col cols="12">
+                            <v-select v-model="newTransaction.transactionType" :items="transactionTypeOptions"
+                                label="Transaction Type" required></v-select>
+                        </v-col>
+                        <v-col cols="12">
+                            <v-select v-model="newTransaction.transactionCategory" :items="categoryOptions"
+                                label="Category" required></v-select>
+                        </v-col>
+                        <v-col cols="12">
+                            <v-text-field v-model="newTransaction.description" label="Description"></v-text-field>
+                        </v-col>
+                    </v-row>
+                </v-form>
+            </v-card-text>
+            <v-card-actions>
+                <v-btn color="blue darken-1" text @click="showAddTransactionDialog = false">Cancel</v-btn>
+                <v-btn color="blue darken-1" text @click="createTransaction">Create</v-btn>
+            </v-card-actions>
+        </v-card>
     </v-dialog>
 </template>
 
@@ -144,7 +193,17 @@ export default {
             localFilterAccount: this.filterAccount,
             localFilterCategory: this.filterCategory,
             localFilterTransactionType: this.filterTransactionType,
-            showFilterDialog: false
+            showFilterDialog: false,
+            showAddTransactionDialog: false,
+            newTransaction: {
+                accountName: null,
+                amount: null,
+                date: new Date().toISOString().substr(0, 10),
+                transactionType: null,
+                transactionCategory: null,
+                description: ''
+            },
+            valid: false
         };
     },
     computed: {
@@ -261,8 +320,46 @@ export default {
         closeTransactionsWindow() {
             this.localShowTransactionsWindow = false;
         },
-        addTransaction() {
-            this.$emit('add-transaction');
+        createTransaction() {
+            if (this.$refs.form.validate()) {
+                const accountId = this.accounts.find(account => account.name === this.newTransaction.accountName).id;
+
+                const category = this.categories.find(category => category.name === this.newTransaction.transactionCategory);
+
+                let transactionTypeValue;
+                if (this.newTransaction.transactionType === 'Income') transactionTypeValue = 1;
+                else if (this.newTransaction.transactionType === 'Expense') transactionTypeValue = -1;
+                else if (this.newTransaction.transactionType === 'Template') transactionTypeValue = 0;
+
+                const payload = {
+                    accountId: accountId,
+                    amount: parseFloat(this.newTransaction.amount),
+                    date: this.newTransaction.date,
+                    transactionType: transactionTypeValue,
+                    transactionCategory: category.value,
+                    description: this.newTransaction.description
+                };
+
+                this.$axios.post('/api/Transaction/create', payload)
+                    .then(response => {
+                        console.log('Transaction created successfully', response);
+                        this.$emit('transactionCreated');
+                    })
+                    .catch(error => {
+                        console.error('Error creating transaction', error);
+                        // Optionally, you can add some error handling code here
+                    });
+
+                this.showAddTransactionDialog = false;
+                this.newTransaction = {
+                    accountName: null,
+                    amount: null,
+                    date: new Date().toISOString().substr(0, 10),
+                    transactionType: null,
+                    transactionCategory: null,
+                    description: ''
+                };
+            }
         },
         getCategoryName(categoryId) {
             for (let i = 0; i < this.categories.length; i++) {
