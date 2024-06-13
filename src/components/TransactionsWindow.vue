@@ -1,6 +1,9 @@
 <template>
     <v-dialog v-model="localShowTransactionsWindow" persistent max-width="800px">
         <v-card>
+            <v-alert v-if="apiAlert.visible" :type="apiAlert.type" dismissible @input="apiAlert.visible = false">
+                {{ apiAlert.message }}
+            </v-alert>
             <v-card-title class="window-title">Transactions history</v-card-title>
             <v-card-text>
                 <v-row>
@@ -133,27 +136,32 @@
         <v-card>
             <v-card-title class="window-title">Add New Transaction</v-card-title>
             <v-card-text>
+                <v-alert v-if="alert.visible" :type="alert.type" dismissible @input="alert.visible = false">
+                    {{ alert.message }}
+                </v-alert>
                 <v-form ref="form" v-model="valid" lazy-validation>
                     <v-row>
                         <v-col cols="12">
                             <v-select v-model="newTransaction.accountName" :items="accountOptions" label="Account"
-                                item-text="name" item-value="id" required></v-select>
+                                item-text="name" item-value="id" :rules="[v => !!v || 'Account is required']"
+                                required></v-select>
                         </v-col>
                         <v-col cols="12">
                             <v-text-field v-model="newTransaction.amount" label="Amount" type="number"
-                                required></v-text-field>
+                                :rules="[v => !!v || 'Amount is required']" required></v-text-field>
                         </v-col>
                         <v-col cols="12">
                             <v-text-field v-model="newTransaction.date" label="Date" type="date"
-                                required></v-text-field>
+                                :rules="[v => !!v || 'Date is required']" required></v-text-field>
                         </v-col>
                         <v-col cols="12">
                             <v-select v-model="newTransaction.transactionType" :items="transactionTypeOptions"
-                                label="Transaction Type" required></v-select>
+                                label="Transaction Type" :rules="[v => !!v || 'Transaction type is required']"
+                                required></v-select>
                         </v-col>
                         <v-col cols="12">
                             <v-select v-model="newTransaction.transactionCategory" :items="categoryOptions"
-                                label="Category" required></v-select>
+                                label="Category" :rules="[v => !!v || 'Category is required']" required></v-select>
                         </v-col>
                         <v-col cols="12">
                             <v-text-field v-model="newTransaction.description" label="Description"></v-text-field>
@@ -203,7 +211,17 @@ export default {
                 transactionCategory: null,
                 description: ''
             },
-            valid: false
+            valid: false,
+            alert: {
+                visible: false,
+                type: '',
+                message: ''
+            },
+            apiAlert: {
+                visible: false,
+                type: '',
+                message: ''
+            }
         };
     },
     computed: {
@@ -320,10 +338,32 @@ export default {
         closeTransactionsWindow() {
             this.localShowTransactionsWindow = false;
         },
+        clearAlerts() {
+            this.alert = {
+                visible: false,
+                type: '',
+                message: ''
+            };
+            this.apiAlert = {
+                visible: false,
+                type: '',
+                message: ''
+            };
+        },
         createTransaction() {
-            if (this.$refs.form.validate()) {
-                const accountId = this.accounts.find(account => account.name === this.newTransaction.accountName).id;
+            this.$refs.form.validate();
+            if (!this.valid) {
+                this.alert = {
+                    visible: true,
+                    type: 'error',
+                    message: 'Please fill in all required fields.'
+                };
+                setTimeout(this.clearAlerts, 5000);
+                return;
+            }
 
+            try {
+                const accountId = this.accounts.find(account => account.name === this.newTransaction.accountName).id;
                 const category = this.categories.find(category => category.name === this.newTransaction.transactionCategory);
 
                 let transactionTypeValue;
@@ -344,10 +384,23 @@ export default {
                     .then(response => {
                         console.log('Transaction created successfully', response);
                         this.$emit('transactionCreated');
+                        this.apiAlert = {
+                            visible: true,
+                            type: 'success',
+                            message: 'Transaction created successfully!'
+                        };
+                        setTimeout(this.clearAlerts, 5000);
                     })
                     .catch(error => {
                         console.error('Error creating transaction', error);
-                        // Optionally, you can add some error handling code here
+                        const errorArray = JSON.parse(error.response.data.detail);
+                        const errorMessages = errorArray.map(error => error.ErrorMessage);
+                        this.apiAlert = {
+                            visible: true,
+                            type: 'error',
+                            message: 'Error creating transaction: ' + errorMessages[0]
+                        };
+                        setTimeout(this.clearAlerts, 5000);
                     });
 
                 this.showAddTransactionDialog = false;
@@ -359,6 +412,15 @@ export default {
                     transactionCategory: null,
                     description: ''
                 };
+            } catch (error) {
+                console.error(error);
+                this.showAddTransactionDialog = false;
+                this.alert = {
+                    visible: true,
+                    type: 'error',
+                    message: 'Error creating transaction: ' + error.message
+                };
+                setTimeout(this.clearAlerts, 5000);
             }
         },
         getCategoryName(categoryId) {
