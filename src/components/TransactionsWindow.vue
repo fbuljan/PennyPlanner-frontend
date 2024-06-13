@@ -46,7 +46,7 @@
                                             @click="applyTemplate(transaction)">
                                             <v-icon>mdi-check</v-icon>
                                         </v-btn>
-                                        <v-btn icon small @click="editTransaction(transaction)">
+                                        <v-btn icon small @click="openUpdateDialog(transaction)">
                                             <v-icon>mdi-pencil</v-icon>
                                         </v-btn>
                                         <v-btn icon small @click="deleteTransaction(transaction)">
@@ -185,7 +185,7 @@
             <v-card-title class="window-title">Delete Transaction</v-card-title>
             <v-card-text>
                 <h1>Are you sure you want to delete this transaction?</h1>
-                <br/>
+                <br />
                 <div v-if="transactionToDelete">
                     <p><strong>Amount:</strong> {{ transactionToDelete.amount }} €</p>
                     <p><strong>Account:</strong> {{ transactionToDelete.accountName }}</p>
@@ -197,6 +197,45 @@
             <v-card-actions>
                 <v-btn color="blue darken-1" text @click="showDeleteDialog = false">Cancel</v-btn>
                 <v-btn color="red darken-1" text @click="confirmDeleteTransaction">Delete</v-btn>
+            </v-card-actions>
+        </v-card>
+    </v-dialog>
+
+    <v-dialog v-model="showUpdateTransactionDialog" persistent max-width="600px">
+        <v-card>
+            <v-card-title class="window-title">Update Transaction</v-card-title>
+            <v-card-text>
+                <v-alert v-if="updateAlert.visible" :type="updateAlert.type" dismissible
+                    @input="updateAlert.visible = false">
+                    {{ updateAlert.message }}
+                </v-alert>
+                <v-form ref="updateForm" v-model="updateValid" lazy-validation>
+                    <v-row>
+                        <v-col cols="12">
+                            <v-text-field v-model="updatedTransaction.amount" label="Amount"
+                                type="number"></v-text-field>
+                        </v-col>
+                        <v-col cols="12">
+                            <v-text-field v-model="updatedTransaction.date" label="Date" type="date"
+                                :rules="[v => !!v || 'Date is required']" required></v-text-field>
+                        </v-col>
+                        <v-col cols="12">
+                            <v-select v-model="updatedTransaction.transactionType" :items="transactionTypeOptions"
+                                label="Transaction Type"></v-select>
+                        </v-col>
+                        <v-col cols="12">
+                            <v-select v-model="updatedTransaction.transactionCategory" :items="categoryOptions"
+                                label="Category"></v-select>
+                        </v-col>
+                        <v-col cols="12">
+                            <v-text-field v-model="updatedTransaction.description" label="Description"></v-text-field>
+                        </v-col>
+                    </v-row>
+                </v-form>
+            </v-card-text>
+            <v-card-actions>
+                <v-btn color="blue darken-1" text @click="showUpdateTransactionDialog = false">Cancel</v-btn>
+                <v-btn color="blue darken-1" text @click="updateTransaction">Update</v-btn>
             </v-card-actions>
         </v-card>
     </v-dialog>
@@ -251,6 +290,20 @@ export default {
             showDeleteDialog: false,
             transactionToDelete: null,
             restoreBalance: false,
+            showUpdateTransactionDialog: false,
+            updatedTransaction: {
+                amount: null,
+                date: '',
+                transactionType: null,
+                transactionCategory: null,
+                description: ''
+            },
+            updateValid: false,
+            updateAlert: {
+                visible: false,
+                type: '',
+                message: ''
+            }
         };
     },
     computed: {
@@ -375,9 +428,6 @@ export default {
 
             this.showAddTransactionDialog = true;
         },
-        editTransaction(transaction) {
-            this.$emit('edit-transaction', transaction);
-        },
         closeTransactionsWindow() {
             this.localShowTransactionsWindow = false;
         },
@@ -392,6 +442,11 @@ export default {
                 type: '',
                 message: ''
             };
+            this.updateAlert = {
+                visible: false,
+                type: '',
+                message: ''
+            }
         },
         createTransaction() {
             this.$refs.form.validate();
@@ -515,6 +570,56 @@ export default {
         deleteTransaction(transaction) {
             this.openDeleteDialog(transaction);
         },
+        openUpdateDialog(transaction) {
+            this.updatedTransaction = {
+                ...transaction,
+                date: this.formatDate(transaction.date)
+            };
+            this.showUpdateTransactionDialog = true;
+        },
+        async updateTransaction() {
+            this.$refs.updateForm.validate();
+            if (!this.updateValid) {
+                this.updateAlert = {
+                    visible: true,
+                    type: 'error',
+                    message: 'Please fill in all required fields.'
+                };
+                setTimeout(this.clearAlerts, 5000);
+                return;
+            }
+
+            try {
+                const payload = {
+                    id: this.updatedTransaction.id,
+                    amount: parseFloat(this.updatedTransaction.amount),
+                    date: this.updatedTransaction.date,
+                    transactionType: this.updatedTransaction.transactionType,
+                    transactionCategory: this.updatedTransaction.transactionCategory,
+                    description: this.updatedTransaction.description
+                };
+
+                await this.$axios.put(`/api/Transaction/update`, payload);
+                this.$emit('transactionUpdated');
+                this.apiAlert = {
+                    visible: true,
+                    type: 'success',
+                    message: 'Transaction updated successfully!'
+                };
+                setTimeout(this.clearAlerts, 5000);
+                this.showUpdateTransactionDialog = false;
+            } catch (error) {
+                console.error('Error updating transaction', error);
+                const errorArray = JSON.parse(error.response.data.detail);
+                const errorMessages = errorArray.map(error => error.ErrorMessage);
+                this.updateAlert = {
+                    visible: true,
+                    type: 'error',
+                    message: 'Error updating transaction: ' + errorMessages[0]
+                };
+                setTimeout(this.clearAlerts, 5000);
+            }
+        },
         getCategoryName(categoryId) {
             for (let i = 0; i < this.categories.length; i++) {
                 if (this.categories[i].value == categoryId) {
@@ -531,6 +636,13 @@ export default {
             } else if (filterType === 'transactionType') {
                 this.localFilterTransactionType = '';
             }
+        },
+        formatDate(dateString) {
+            const date = new Date(dateString);
+            const year = date.getFullYear();
+            const month = ('0' + (date.getMonth() + 1)).slice(-2);
+            const day = ('0' + date.getDate()).slice(-2);
+            return `${year}-${month}-${day}`;
         }
     },
     watch: {

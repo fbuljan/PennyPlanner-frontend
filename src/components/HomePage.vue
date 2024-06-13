@@ -102,6 +102,7 @@
         </v-container>
 
         <TransactionsWindow @transactionCreated="fetchUser" @transactionDeleted="fetchUser"
+            @transactionUpdated="fetchUser"
             v-model:showTransactionsWindow="showTransactionsWindow"
             :transactions="transactions"
             :accounts="accounts"
