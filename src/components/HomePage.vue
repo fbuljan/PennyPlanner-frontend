@@ -101,7 +101,7 @@
             </v-row>
         </v-container>
 
-        <TransactionsWindow @transactionCreated="fetchUser"
+        <TransactionsWindow @transactionCreated="fetchUser" @transactionDeleted="fetchUser"
             v-model:showTransactionsWindow="showTransactionsWindow"
             :transactions="transactions"
             :accounts="accounts"

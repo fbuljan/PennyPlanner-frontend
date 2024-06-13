@@ -49,7 +49,7 @@
                                         <v-btn icon small @click="editTransaction(transaction)">
                                             <v-icon>mdi-pencil</v-icon>
                                         </v-btn>
-                                        <v-btn icon small @click="deleteTransaction(transaction.id)">
+                                        <v-btn icon small @click="deleteTransaction(transaction)">
                                             <v-icon>mdi-delete</v-icon>
                                         </v-btn>
                                     </v-list-item-action>
@@ -179,6 +179,27 @@
             </v-card-actions>
         </v-card>
     </v-dialog>
+
+    <v-dialog v-model="showDeleteDialog" persistent max-width="400px">
+        <v-card>
+            <v-card-title class="window-title">Delete Transaction</v-card-title>
+            <v-card-text>
+                <h1>Are you sure you want to delete this transaction?</h1>
+                <br/>
+                <div v-if="transactionToDelete">
+                    <p><strong>Amount:</strong> {{ transactionToDelete.amount }} €</p>
+                    <p><strong>Account:</strong> {{ transactionToDelete.accountName }}</p>
+                    <p><strong>Description:</strong> {{ transactionToDelete.description || 'No description' }}</p>
+                    <p><strong>Date:</strong> {{ new Date(transactionToDelete.date).toLocaleDateString() }}</p>
+                </div>
+                <v-checkbox v-model="restoreBalance" label="Restore balance"></v-checkbox>
+            </v-card-text>
+            <v-card-actions>
+                <v-btn color="blue darken-1" text @click="showDeleteDialog = false">Cancel</v-btn>
+                <v-btn color="red darken-1" text @click="confirmDeleteTransaction">Delete</v-btn>
+            </v-card-actions>
+        </v-card>
+    </v-dialog>
 </template>
 
 <script>
@@ -226,7 +247,10 @@ export default {
                 visible: false,
                 type: '',
                 message: ''
-            }
+            },
+            showDeleteDialog: false,
+            transactionToDelete: null,
+            restoreBalance: false,
         };
     },
     computed: {
@@ -246,6 +270,7 @@ export default {
                 return [];
             }
             const startDate = new Date(this.localFilterPeriodStart);
+            startDate.setDate(startDate.getDate() - 1);
             const endDate = new Date(this.localFilterPeriodEnd);
             endDate.setDate(endDate.getDate() + 1);
             return this.transactions
@@ -353,9 +378,6 @@ export default {
         editTransaction(transaction) {
             this.$emit('edit-transaction', transaction);
         },
-        deleteTransaction(transactionId) {
-            this.$emit('delete-transaction', transactionId);
-        },
         closeTransactionsWindow() {
             this.localShowTransactionsWindow = false;
         },
@@ -451,6 +473,47 @@ export default {
                 };
                 setTimeout(this.clearAlerts, 5000);
             }
+        },
+        openDeleteDialog(transaction) {
+            this.transactionToDelete = transaction;
+            this.showDeleteDialog = true;
+        },
+        confirmDeleteTransaction() {
+            const payload = {
+                id: this.transactionToDelete.id,
+                resetAmount: this.restoreBalance
+            }
+
+            this.$axios({
+                method: 'delete',
+                url: '/api/Transaction/delete',
+                data: payload
+            })
+                .then(response => {
+                    console.log('Transaction deleted successfully', response);
+                    this.$emit('transactionDeleted');
+                    this.apiAlert = {
+                        visible: true,
+                        type: 'success',
+                        message: 'Transaction deleted successfully!'
+                    };
+                    setTimeout(this.clearAlerts, 5000);
+                })
+                .catch(error => {
+                    console.error('Error deleting transaction', error.message);
+                    this.apiAlert = {
+                        visible: true,
+                        type: 'error',
+                        message: 'Error creating transaction: ' + error.message
+                    };
+                    setTimeout(this.clearAlerts, 5000);
+                });
+            this.showDeleteDialog = false;
+            this.transactionToDelete = null;
+            this.restoreBalance = false;
+        },
+        deleteTransaction(transaction) {
+            this.openDeleteDialog(transaction);
         },
         getCategoryName(categoryId) {
             for (let i = 0; i < this.categories.length; i++) {
