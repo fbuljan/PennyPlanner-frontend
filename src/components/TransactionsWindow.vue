@@ -470,6 +470,7 @@ export default {
         },
         closeTransactionsWindow() {
             this.localShowTransactionsWindow = false;
+            this.clearAlerts();
         },
         clearAlerts() {
             this.alert = {

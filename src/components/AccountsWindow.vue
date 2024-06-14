@@ -37,7 +37,7 @@
                         <v-card class="rectangle">
                             <v-card-title>Balance Over Time</v-card-title>
                             <v-card-text>
-                                <line-chart :transactions="selectedAccount.transactions"></line-chart>
+                                <line-chart :transactions="selectedAccount.transactions" :current-balance="selectedAccount.balance"></line-chart>
                             </v-card-text>
                         </v-card>
                     </v-col>
@@ -191,9 +191,21 @@ export default {
     },
     methods: {
         selectAccount(account) {
+            this.clearAlerts();
+            if (!account.transactions || account.transactions.length === 0) {
+                this.apiAlert = {
+                    visible: true,
+                    type: 'error',
+                    message: 'There are no transactions for selected account!'
+                };
+                setTimeout(this.clearAlerts, 5000);
+                return;
+            }
+
             this.selectedAccount = account;
         },
         closeAccountsWindow() {
+            this.selectedAccount = null;
             this.localShowAccountsWindow = false;
             this.clearAlerts();
         },
