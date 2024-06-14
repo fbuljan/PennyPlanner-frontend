@@ -383,12 +383,17 @@ export default {
                     return acc;
                 }
 
-                acc[account.name] = account.transactions.filter(transaction => {
+                const filterStart = this.localFilterPeriodStart ? new Date(this.localFilterPeriodStart) : new Date(-8640000000000000); // Min date
+                const filterEnd = this.localFilterPeriodEnd ? new Date(this.localFilterPeriodEnd) : new Date(8640000000000000); // Max date
+
+                const filteredTransactions = account.transactions.filter(transaction => {
                     const transactionDate = new Date(transaction.date);
                     return transaction.transactionType !== 0 &&
-                        transactionDate >= new Date(this.localFilterPeriodStart) &&
-                        transactionDate <= new Date(this.localFilterPeriodEnd);
-                }).length;
+                        transactionDate >= filterStart &&
+                        transactionDate <= filterEnd;
+                });
+
+                acc[account.name] = filteredTransactions.length;
 
                 return acc;
             }, {});
@@ -401,7 +406,20 @@ export default {
                 return { name: 'None', transactions: [] };
             }
 
-            return this.accounts.find(account => account.name === mostUsedAccountName) || { name: 'None', transactions: [] };
+            const mostUsedAccount = this.accounts.find(account => account.name === mostUsedAccountName);
+
+            return {
+                name: mostUsedAccount.name,
+                transactions: mostUsedAccount.transactions.filter(transaction => {
+                    const transactionDate = new Date(transaction.date);
+                    const filterStart = this.localFilterPeriodStart ? new Date(this.localFilterPeriodStart) : new Date(-8640000000000000);
+                    const filterEnd = this.localFilterPeriodEnd ? new Date(this.localFilterPeriodEnd) : new Date(8640000000000000);
+
+                    return transaction.transactionType !== 0 &&
+                        transactionDate >= filterStart &&
+                        transactionDate <= filterEnd;
+                })
+            };
         },
         filteredCategoryCounts() {
             return this.filteredTransactions.reduce((acc, transaction) => {
