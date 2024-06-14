@@ -618,9 +618,18 @@ export default {
             this.openDeleteDialog(transaction);
         },
         openUpdateDialog(transaction) {
+            let transactionTypeValue;
+            if (transaction.transactionType === 1) transactionTypeValue = 'Income';
+            else if (transaction.transactionType === -1) transactionTypeValue = 'Expense';
+            else if (transaction.transactionType === 0) transactionTypeValue = 'Template';
+
             this.updatedTransaction = {
-                ...transaction,
-                date: this.formatDate(transaction.date)
+                id: transaction.id,
+                amount: transaction.amount,
+                date: this.formatDate(transaction.date),
+                description: transaction.description,
+                transactionType: transactionTypeValue,
+                transactionCategory: this.getCategoryName(transaction.transactionCategory)
             };
             this.showUpdateTransactionDialog = true;
         },
@@ -637,12 +646,19 @@ export default {
             }
 
             try {
+                let transactionTypeValue;
+                if (this.updatedTransaction.transactionType === 'Income') transactionTypeValue = 1;
+                else if (this.updatedTransaction.transactionType === 'Expense') transactionTypeValue = -1;
+                else if (this.updatedTransaction.transactionType === 'Template') transactionTypeValue = 0;
+
+                const category = this.categories.find(category => category.name === this.updatedTransaction.transactionCategory);
+
                 const payload = {
                     id: this.updatedTransaction.id,
                     amount: parseFloat(this.updatedTransaction.amount),
                     date: this.updatedTransaction.date,
-                    transactionType: this.updatedTransaction.transactionType,
-                    transactionCategory: this.updatedTransaction.transactionCategory,
+                    transactionType: transactionTypeValue,
+                    transactionCategory: category.value,
                     description: this.updatedTransaction.description
                 };
 
@@ -657,13 +673,22 @@ export default {
                 this.showUpdateTransactionDialog = false;
             } catch (error) {
                 console.error('Error updating transaction', error);
-                const errorArray = JSON.parse(error.response.data.detail);
-                const errorMessages = errorArray.map(error => error.ErrorMessage);
-                this.updateAlert = {
-                    visible: true,
-                    type: 'error',
-                    message: 'Error updating transaction: ' + errorMessages[0]
-                };
+                try {
+                    const errorArray = JSON.parse(error.response.data.detail);
+                    const errorMessages = errorArray.map(error => error.ErrorMessage);
+                    this.updateAlert = {
+                        visible: true,
+                        type: 'error',
+                        message: 'Error updating transaction: ' + errorMessages[0]
+                    };
+                }
+                catch (error2) {
+                    this.updateAlert = {
+                        visible: true,
+                        type: 'error',
+                        message: 'Error updating transaction: ' + error.response.data.title
+                    };
+                }
                 setTimeout(this.clearAlerts, 5000);
             }
         },
