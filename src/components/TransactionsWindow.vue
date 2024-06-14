@@ -97,7 +97,7 @@
                 </v-row>
             </v-card-text>
             <v-card-actions>
-                <v-btn color="blue darken-1" text @click="closeTransactionsWindow">Cancel</v-btn>
+                <v-btn color="blue darken-1" text @click="closeTransactionsWindow">Close</v-btn>
                 <v-spacer></v-spacer>
                 <v-btn color="blue darken-1" text @click="showAddTransactionDialog = true">Add</v-btn>
             </v-card-actions>
