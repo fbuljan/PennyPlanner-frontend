@@ -198,6 +198,7 @@ export default {
                     type: 'error',
                     message: 'There are no transactions for selected account!'
                 };
+                this.selectedAccount = null;
                 setTimeout(this.clearAlerts, 5000);
                 return;
             }
