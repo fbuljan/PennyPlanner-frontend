@@ -58,6 +58,7 @@
                         @input="addAlert.visible = false">
                         {{ addAlert.message }}
                     </v-alert>
+                    <br />
                     <v-form ref="form" v-model="valid" lazy-validation>
                         <v-row>
                             <v-col cols="12">
@@ -75,7 +76,7 @@
                     </v-form>
                 </v-card-text>
                 <v-card-actions>
-                    <v-btn color="blue darken-1" text @click="showAddAccountDialog = false">Cancel</v-btn>
+                    <v-btn color="blue darken-1" text @click="showAddAccountDialog = false; this.clearAlerts()">Cancel</v-btn>
                     <v-btn color="blue darken-1" text @click="createAccount">Create</v-btn>
                 </v-card-actions>
             </v-card>
@@ -85,10 +86,11 @@
             <v-card>
                 <v-card-title class="window-title">Edit Account</v-card-title>
                 <v-card-text>
-                    <v-alert v-if="addAlert.visible" :type="addAlert.type" dismissible
-                        @input="addAlert.visible = false">
-                        {{ addAlert.message }}
+                    <v-alert v-if="updateAlert.visible" :type="updateAlert.type" dismissible
+                        @input="updateAlert.visible = false">
+                        {{ updateAlert.message }}
                     </v-alert>
+                    <br />
                     <v-form ref="editForm" v-model="valid" lazy-validation>
                         <v-row>
                             <v-col cols="12">
@@ -98,15 +100,11 @@
                             <v-col cols="12">
                                 <v-text-field v-model="editAccount.description" label="Description"></v-text-field>
                             </v-col>
-                            <v-col cols="12">
-                                <v-text-field v-model="editAccount.balance" label="Balance" type="number"
-                                    :rules="[v => !!v || 'Balance is required']" required></v-text-field>
-                            </v-col>
                         </v-row>
                     </v-form>
                 </v-card-text>
                 <v-card-actions>
-                    <v-btn color="blue darken-1" text @click="showEditAccountDialog = false">Cancel</v-btn>
+                    <v-btn color="blue darken-1" text @click="showEditAccountDialog = false; this.clearAlerts()">Cancel</v-btn>
                     <v-btn color="blue darken-1" text @click="updateAccount">Update</v-btn>
                 </v-card-actions>
             </v-card>
@@ -160,8 +158,7 @@ export default {
             editAccount: {
                 id: null,
                 name: '',
-                description: '',
-                balance: null
+                description: ''
             },
             accountToDelete: null,
             valid: false,
@@ -198,6 +195,7 @@ export default {
         },
         closeAccountsWindow() {
             this.localShowAccountsWindow = false;
+            this.clearAlerts();
         },
         createAccount() {
             this.$refs.form.validate();
@@ -255,15 +253,47 @@ export default {
         updateAccount() {
             this.$refs.editForm.validate();
             if (!this.valid) {
-                this.addAlert = {
+                this.updateAlert = {
                     visible: true,
                     type: 'error',
                     message: 'Please fill in all required fields.'
                 };
-                setTimeout(() => this.addAlert.visible = false, 5000);
+                setTimeout(this.clearAlerts, 5000);
                 return;
             }
-            // API call to update account
+
+            const payload = {
+                id: this.editAccount.id,
+                name: this.editAccount.name,
+                description: this.editAccount.description
+            };
+
+            this.$axios.put('/api/Account/update', payload)
+                .then(response => {
+                    console.log('Account updated successfully', response);
+                    this.$emit('accountUpdated');
+                    this.apiAlert = {
+                        visible: true,
+                        type: 'success',
+                        message: 'Account updated successfully!'
+                    };
+                    setTimeout(this.clearAlerts, 5000);
+                    this.showEditAccountDialog = false;
+                    this.editAccount = {
+                        name: '',
+                        description: '',
+                        id: null
+                    };
+                })
+                .catch(error => {
+                    console.error('Error updating account', error);
+                    this.updateAlert = {
+                        visible: true,
+                        type: 'error',
+                        message: 'Error updating account: ' + error.response.data.title
+                    };
+                    setTimeout(this.clearAlerts, 5000);
+                });
         },
         openDeleteDialog(account) {
             this.accountToDelete = account;

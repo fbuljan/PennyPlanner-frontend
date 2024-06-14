@@ -118,8 +118,8 @@
             :filterCategory="filterCategory" :filterTransactionType="filterTransactionType"
             @close-transactions-window="showTransactionsWindow = false" />
 
-        <AccountsWindow @accountCreated="fetchUser" v-model:showAccountsWindow="showAccountsWindow"
-            :accounts="accounts" />
+        <AccountsWindow @accountCreated="fetchUser" @accountUpdated="fetchUser"
+            v-model:showAccountsWindow="showAccountsWindow" :accounts="accounts" />
 
         <v-overlay :value="showTransactionsWindow || showAccountsWindow">
             <div class="blur-background"></div>
