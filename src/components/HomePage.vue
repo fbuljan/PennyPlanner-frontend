@@ -5,7 +5,7 @@
             <v-spacer></v-spacer>
             <v-btn>Currency calculator</v-btn>
             <v-btn @click="showTransactionsWindow = true">Transactions</v-btn>
-            <v-btn>Accounts</v-btn>
+            <v-btn @click="showAccountsWindow = true">Accounts</v-btn>
             <v-btn>Goals</v-btn>
             <v-container class="d-flex align-items-center" style="width: auto;">
                 <v-btn icon>
@@ -31,11 +31,15 @@
                                 <v-row style="width: 100%">
                                     <v-col cols="12" md="6" class="d-flex flex-column align-center justify-center">
                                         <v-card-title class="larger-text-total">Current balance:</v-card-title>
-                                        <v-card-subtitle class="larger-text-total display-4 text--primary">{{ totalBalance }} €</v-card-subtitle>
+                                        <v-card-subtitle class="larger-text-total display-4 text--primary">{{
+                                            totalBalance }} €</v-card-subtitle>
                                     </v-col>
-                                    <v-col cols="12" md="6" class="d-flex flex-column" style="max-height: 250px; overflow-y: auto;">
-                                        <v-card-text v-for="account in accounts" :key="account.name" class="account-item larger-text">
-                                            <strong :style="{ color: '#1867c0' }">{{ account.name }}:</strong> {{ account.balance }} €
+                                    <v-col cols="12" md="6" class="d-flex flex-column"
+                                        style="max-height: 250px; overflow-y: auto;">
+                                        <v-card-text v-for="account in accounts" :key="account.name"
+                                            class="account-item larger-text">
+                                            <strong :style="{ color: '#1867c0' }">{{ account.name }}:</strong> {{
+                                            account.balance }} €
                                         </v-card-text>
                                     </v-col>
                                 </v-row>
@@ -52,9 +56,11 @@
                             <v-card class="rectangle">
                                 <v-card-title>Last 3 transactions</v-card-title>
                                 <v-list dense style="background-color: #f5f5f5;">
-                                    <v-list-item v-for="transaction in latestTransactions" :key="transaction.id" class="transaction-item">
+                                    <v-list-item v-for="transaction in latestTransactions" :key="transaction.id"
+                                        class="transaction-item">
                                         <v-list-item-content class="transaction-content">
-                                            <v-list-item-title class="transaction-title" :style="transaction.transactionType < 0 ? 'color: red;' : 'color: green;'">
+                                            <v-list-item-title class="transaction-title"
+                                                :style="transaction.transactionType < 0 ? 'color: red;' : 'color: green;'">
                                                 <template v-if="transaction.transactionType < 0">
                                                     <v-icon color="red">mdi-arrow-down</v-icon>
                                                 </template>
@@ -67,12 +73,13 @@
                                                 {{ transaction.accountName }}
                                             </v-list-item-subtitle>
                                             <v-list-item-subtitle class="larger-text-transaction">
-                                                {{ transaction.description ? transaction.description : 'No description' }}
+                                                {{ transaction.description ? transaction.description : 'No description'
+                                                }}
                                             </v-list-item-subtitle>
                                             <v-list-item-subtitle class="larger-text-transaction">
                                                 {{ new Date(transaction.date).toLocaleDateString() }}
                                             </v-list-item-subtitle>
-                                            </v-list-item-content>
+                                        </v-list-item-content>
                                     </v-list-item>
                                 </v-list>
                             </v-card>
@@ -82,7 +89,9 @@
                                 <v-card-title>Stats</v-card-title>
                                 <v-card-text>
                                     <div class="stats-item">
-                                        <strong>Most used account:</strong> {{ mostUsedAccount.name }} ({{ mostUsedAccount.transactions.length }} transactions)
+                                        <strong>Most used account:</strong> {{ mostUsedAccount.name }} ({{
+                                        mostUsedAccount.transactions.length
+                                        }} transactions)
                                     </div>
                                     <div class="stats-item">
                                         <strong>Most common transaction category:</strong> {{ categoryName }}
@@ -91,7 +100,8 @@
                                         <strong>Average monthly income:</strong> {{ averageMonthlyIncome.toFixed(2) }} €
                                     </div>
                                     <div class="stats-item">
-                                        <strong>Average monthly expenditure:</strong> {{ averageMonthlyExpenditure.toFixed(2) }} €
+                                        <strong>Average monthly expenditure:</strong> {{
+                                        averageMonthlyExpenditure.toFixed(2) }} €
                                     </div>
                                 </v-card-text>
                             </v-card>
@@ -102,20 +112,15 @@
         </v-container>
 
         <TransactionsWindow @transactionCreated="fetchUser" @transactionDeleted="fetchUser"
-            @transactionUpdated="fetchUser"
-            v-model:showTransactionsWindow="showTransactionsWindow"
-            :transactions="transactions"
-            :accounts="accounts"
-            :categories="categories"
-            :filterPeriodStart="filterPeriodStart"
-            :filterPeriodEnd="filterPeriodEnd"
-            :filterAccount="filterAccount"
-            :filterCategory="filterCategory"
-            :filterTransactionType="filterTransactionType"
-            @close-transactions-window="showTransactionsWindow = false"
-        />
+            @transactionUpdated="fetchUser" v-model:showTransactionsWindow="showTransactionsWindow"
+            :transactions="transactions" :accounts="accounts" :categories="categories"
+            :filterPeriodStart="filterPeriodStart" :filterPeriodEnd="filterPeriodEnd" :filterAccount="filterAccount"
+            :filterCategory="filterCategory" :filterTransactionType="filterTransactionType"
+            @close-transactions-window="showTransactionsWindow = false" />
 
-        <v-overlay :value="showTransactionsWindow">
+        <AccountsWindow v-model:showAccountsWindow="showAccountsWindow" :accounts="accounts" />
+
+        <v-overlay :value="showTransactionsWindow || showAccountsWindow">
             <div class="blur-background"></div>
         </v-overlay>
     </div>
@@ -123,11 +128,13 @@
 
 <script>
 import TransactionsWindow from './TransactionsWindow.vue';
+import AccountsWindow from './AccountsWindow.vue';
 
 export default {
     name: 'HomePage',
     components: {
-        TransactionsWindow
+        TransactionsWindow,
+        AccountsWindow
     },
     data() {
         return {
@@ -142,6 +149,7 @@ export default {
             averageMonthlyIncome: 0,
             averageMonthlyExpenditure: 0,
             showTransactionsWindow: false,
+            showAccountsWindow: false,
             filterPeriodStart: '',
             filterPeriodEnd: '',
             filterAccount: '',
