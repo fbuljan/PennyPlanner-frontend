@@ -345,7 +345,7 @@ export default {
                     }
 
                     if (matchesFilters && this.localFilterAccount) {
-                        const account = this.accounts.find(account => account.transactions.some(accTransaction => accTransaction.id === transaction.id));
+                        const account = this.accounts.find(account => account.transactions && account.transactions.some(accTransaction => accTransaction.id === transaction.id));
                         matchesFilters = account && account.name === this.localFilterAccount;
                     }
 
@@ -370,7 +370,7 @@ export default {
                     return matchesFilters;
                 })
                 .map(transaction => {
-                    const account = this.accounts.find(account => account.transactions.some(accTransaction => accTransaction.id === transaction.id));
+                    const account = this.accounts.find(account => account.transactions && account.transactions.some(accTransaction => accTransaction.id === transaction.id));
                     return {
                         ...transaction,
                         accountName: account ? account.name : 'Unknown'
@@ -379,10 +379,17 @@ export default {
         },
         filteredMostUsedAccount() {
             const accountTransactionCounts = this.accounts.reduce((acc, account) => {
+                if (!account.transactions || account.transactions.length === 0) {
+                    return acc;
+                }
+
                 acc[account.name] = account.transactions.filter(transaction => {
                     const transactionDate = new Date(transaction.date);
-                    return transaction.transactionType !== 0 && transactionDate >= new Date(this.localFilterPeriodStart) && transactionDate <= new Date(this.localFilterPeriodEnd);
+                    return transaction.transactionType !== 0 &&
+                        transactionDate >= new Date(this.localFilterPeriodStart) &&
+                        transactionDate <= new Date(this.localFilterPeriodEnd);
                 }).length;
+
                 return acc;
             }, {});
 

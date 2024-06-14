@@ -118,7 +118,8 @@
             :filterCategory="filterCategory" :filterTransactionType="filterTransactionType"
             @close-transactions-window="showTransactionsWindow = false" />
 
-        <AccountsWindow v-model:showAccountsWindow="showAccountsWindow" :accounts="accounts" />
+        <AccountsWindow @accountCreated="fetchUser" v-model:showAccountsWindow="showAccountsWindow"
+            :accounts="accounts" />
 
         <v-overlay :value="showTransactionsWindow || showAccountsWindow">
             <div class="blur-background"></div>
@@ -169,7 +170,7 @@ export default {
             return this.transactions
                 .filter(transaction => transaction.transactionType !== 0)
                 .map(transaction => {
-                    const account = this.accounts.find(account => account.transactions.some(accTransaction => accTransaction.id === transaction.id));
+                    const account = this.accounts.find(account => account.transactions && account.transactions.some(accTransaction => accTransaction.id === transaction.id));
                     return {
                         ...transaction,
                         accountName: account ? account.name : 'Unknown'
@@ -212,11 +213,15 @@ export default {
             // Most used account
             let maxTransactions = 0;
             this.accounts.forEach(account => {
-                if (account.transactions.length > maxTransactions) {
-                    maxTransactions = account.transactions.length;
-                    this.mostUsedAccount = account;
-                }
-            });
+            if (!account.transactions || account.transactions.length === 0) {
+                return;
+            }
+
+            if (account.transactions.length > maxTransactions) {
+                maxTransactions = account.transactions.length;
+                this.mostUsedAccount = account;
+            }
+        });
 
             // Most common transaction category
             const categoryCount = {};

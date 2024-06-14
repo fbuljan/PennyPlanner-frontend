@@ -1,6 +1,9 @@
 <template>
     <v-dialog v-model="localShowAccountsWindow" persistent max-width="800px">
         <v-card>
+            <v-alert v-if="apiAlert.visible" :type="apiAlert.type" dismissible @input="apiAlert.visible = false">
+                {{ apiAlert.message }}
+            </v-alert>
             <v-card-title class="window-title">Accounts</v-card-title>
             <v-card-text>
                 <v-row>
@@ -10,9 +13,12 @@
                                 :class="{ 'selected-account': selectedAccount && selectedAccount.id === account.id }"
                                 class="account-item">
                                 <v-list-item-content class="accounts-content">
-                                    <v-list-item-title class="larger-text-accounts">{{ account.name }}</v-list-item-title>
-                                    <v-list-item-subtitle class="larger-text-accounts">{{ account.description }}</v-list-item-subtitle>
-                                    <v-list-item-subtitle class="larger-text-accounts balance">{{ account.balance }} €</v-list-item-subtitle>
+                                    <v-list-item-title class="larger-text-accounts">{{ account.name
+                                        }}</v-list-item-title>
+                                    <v-list-item-subtitle class="larger-text-accounts">{{ account.description
+                                        }}</v-list-item-subtitle>
+                                    <v-list-item-subtitle class="larger-text-accounts balance">{{ account.balance }}
+                                        €</v-list-item-subtitle>
                                     <v-list-item-action class="account-item">
                                         <v-btn icon small @click.stop="openEditDialog(account)">
                                             <v-icon>mdi-pencil</v-icon>
@@ -48,8 +54,9 @@
             <v-card>
                 <v-card-title class="window-title">Add New Account</v-card-title>
                 <v-card-text>
-                    <v-alert v-if="alert.visible" :type="alert.type" dismissible @input="alert.visible = false">
-                        {{ alert.message }}
+                    <v-alert v-if="addAlert.visible" :type="addAlert.type" dismissible
+                        @input="addAlert.visible = false">
+                        {{ addAlert.message }}
                     </v-alert>
                     <v-form ref="form" v-model="valid" lazy-validation>
                         <v-row>
@@ -78,8 +85,9 @@
             <v-card>
                 <v-card-title class="window-title">Edit Account</v-card-title>
                 <v-card-text>
-                    <v-alert v-if="alert.visible" :type="alert.type" dismissible @input="alert.visible = false">
-                        {{ alert.message }}
+                    <v-alert v-if="addAlert.visible" :type="addAlert.type" dismissible
+                        @input="addAlert.visible = false">
+                        {{ addAlert.message }}
                     </v-alert>
                     <v-form ref="editForm" v-model="valid" lazy-validation>
                         <v-row>
@@ -157,7 +165,17 @@ export default {
             },
             accountToDelete: null,
             valid: false,
-            alert: {
+            addAlert: {
+                visible: false,
+                type: '',
+                message: ''
+            },
+            updateAlert: {
+                visible: false,
+                type: '',
+                message: ''
+            },
+            apiAlert: {
                 visible: false,
                 type: '',
                 message: ''
@@ -184,15 +202,51 @@ export default {
         createAccount() {
             this.$refs.form.validate();
             if (!this.valid) {
-                this.alert = {
+                this.addAlert = {
                     visible: true,
                     type: 'error',
                     message: 'Please fill in all required fields.'
                 };
-                setTimeout(() => this.alert.visible = false, 5000);
+                setTimeout(this.clearAlerts, 5000);
                 return;
             }
-            // API call to create account
+
+            const payload = {
+                userId: localStorage.getItem('id'),
+                name: this.newAccount.name,
+                balance: this.newAccount.balance,
+                description: this.newAccount.description
+            };
+
+            this.$axios.post('/api/Account/create', payload)
+                .then(response => {
+                    console.log('Account created successfully', response);
+                    this.$emit('accountCreated');
+                    this.apiAlert = {
+                        visible: true,
+                        type: 'success',
+                        message: 'Account created successfully!'
+                    };
+                    setTimeout(this.clearAlerts, 5000);
+                    this.showAddAccountDialog = false;
+                    this.newAccount = {
+                        name: '',
+                        description: '',
+                        balance: null
+                    };
+                })
+                .catch(error => {
+                    console.error('Error creating account', error);
+                    const errorArray = JSON.parse(error.response.data.detail);
+                    const errorMessages = errorArray.map(error => error.ErrorMessage);
+                    this.apiAlert = {
+                        visible: true,
+                        type: 'error',
+                        message: 'Error creating account: ' + errorMessages[0]
+                    };
+                    setTimeout(this.clearAlerts, 5000);
+                    this.showAddAccountDialog = false;
+                });
         },
         openEditDialog(account) {
             this.editAccount = { ...account };
@@ -201,12 +255,12 @@ export default {
         updateAccount() {
             this.$refs.editForm.validate();
             if (!this.valid) {
-                this.alert = {
+                this.addAlert = {
                     visible: true,
                     type: 'error',
                     message: 'Please fill in all required fields.'
                 };
-                setTimeout(() => this.alert.visible = false, 5000);
+                setTimeout(() => this.addAlert.visible = false, 5000);
                 return;
             }
             // API call to update account
@@ -217,6 +271,23 @@ export default {
         },
         confirmDeleteAccount() {
             // API call to delete account
+        },
+        clearAlerts() {
+            this.addAlert = {
+                visible: false,
+                type: '',
+                message: ''
+            };
+            this.apiAlert = {
+                visible: false,
+                type: '',
+                message: ''
+            };
+            this.updateAlert = {
+                visible: false,
+                type: '',
+                message: ''
+            }
         }
     },
     watch: {
