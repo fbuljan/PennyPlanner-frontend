@@ -1,6 +1,24 @@
 <template>
-    <div>
-        <Line :data="chartData" :options="chartOptions"></Line>
+    <div class="chart-container">
+        <v-row>
+            <v-col cols="12" md="6" class="d-flex">
+                <v-text-field v-model="localFilterPeriodStart" label="From" type="date"
+                    prepend-icon="mdi-calendar" class="flex-grow-1"></v-text-field>
+                <v-btn icon @click="clearDate('start')" class="date-clear-button">
+                    <v-icon>mdi-close</v-icon>
+                </v-btn>
+            </v-col>
+            <v-col cols="12" md="6" class="d-flex">
+                <v-text-field v-model="localFilterPeriodEnd" label="To" type="date" prepend-icon="mdi-calendar"
+                    class="flex-grow-1"></v-text-field>
+                <v-btn icon @click="clearDate('end')" class="date-clear-button">
+                    <v-icon>mdi-close</v-icon>
+                </v-btn>
+            </v-col>
+        </v-row>
+        <div class="chart-wrapper">
+            <Line :data="chartData" :options="chartOptions"></Line>
+        </div>
     </div>
 </template>
 
@@ -30,7 +48,9 @@ export default {
             chartData: {
                 labels: [],
                 datasets: []
-            }
+            },
+            localFilterPeriodStart: null,
+            localFilterPeriodEnd: null
         }
     },
     watch: {
@@ -39,18 +59,34 @@ export default {
             handler(newTransactions) {
                 this.updateChartData(newTransactions, this.currentBalance)
             }
+        },
+        localFilterPeriodStart() {
+            this.updateChartData(this.transactions, this.currentBalance)
+        },
+        localFilterPeriodEnd() {
+            this.updateChartData(this.transactions, this.currentBalance)
         }
     },
     methods: {
         updateChartData(transactions, currentBalance) {
-            transactions.sort((a, b) => new Date(a.date) - new Date(b.date));
+            let filteredTransactions = transactions;
+
+            if (this.localFilterPeriodStart) {
+                filteredTransactions = filteredTransactions.filter(t => new Date(t.date) >= new Date(this.localFilterPeriodStart));
+            }
+
+            if (this.localFilterPeriodEnd) {
+                filteredTransactions = filteredTransactions.filter(t => new Date(t.date) <= new Date(this.localFilterPeriodEnd));
+            }
+
+            filteredTransactions.sort((a, b) => new Date(a.date) - new Date(b.date));
 
             const labels = [];
             const data = [];
             let balance = currentBalance;
 
-            for (let i = transactions.length - 1; i >= 0; i--) {
-                const t = transactions[i];
+            for (let i = filteredTransactions.length - 1; i >= 0; i--) {
+                const t = filteredTransactions[i];
                 if (t.transactionType !== 0) {
                     labels.unshift(new Date(t.date).toLocaleDateString());
                     if (t.transactionType === -1) {
@@ -75,6 +111,13 @@ export default {
                     }
                 ]
             };
+        },
+        clearDate(type) {
+            if (type === 'start') {
+                this.localFilterPeriodStart = null;
+            } else if (type === 'end') {
+                this.localFilterPeriodEnd = null;
+            }
         }
     },
     computed: {
@@ -89,7 +132,22 @@ export default {
 </script>
 
 <style scoped>
-div {
-    height: 400px;
+.chart-container {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.chart-wrapper {
+    flex-grow: 1;
+    display: flex;
+}
+
+.chart-wrapper > * {
+    flex-grow: 1;
+}
+
+.date-clear-button {
+    margin-left: 8px;
 }
 </style>
