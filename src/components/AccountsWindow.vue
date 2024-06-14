@@ -300,7 +300,36 @@ export default {
             this.showDeleteAccountDialog = true;
         },
         confirmDeleteAccount() {
-            // API call to delete account
+            const payload = {
+                id: this.accountToDelete.id,
+            }
+
+            this.$axios({
+                method: 'delete',
+                url: '/api/Account/delete',
+                data: payload
+            })
+                .then(response => {
+                    console.log('Account deleted successfully', response);
+                    this.$emit('accountDeleted');
+                    this.apiAlert = {
+                        visible: true,
+                        type: 'success',
+                        message: 'Account deleted successfully!'
+                    };
+                    setTimeout(this.clearAlerts, 5000);
+                })
+                .catch(error => {
+                    console.error('Error deleting account', error.message);
+                    this.apiAlert = {
+                        visible: true,
+                        type: 'error',
+                        message: 'Error deleting account: ' + error.message
+                    };
+                    setTimeout(this.clearAlerts, 5000);
+                });
+
+                this.showDeleteAccountDialog = false;
         },
         clearAlerts() {
             this.addAlert = {

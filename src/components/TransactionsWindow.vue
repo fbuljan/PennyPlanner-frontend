@@ -606,7 +606,7 @@ export default {
                     this.apiAlert = {
                         visible: true,
                         type: 'error',
-                        message: 'Error creating transaction: ' + error.message
+                        message: 'Error deleting transaction: ' + error.message
                     };
                     setTimeout(this.clearAlerts, 5000);
                 });
