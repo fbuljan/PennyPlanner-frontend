@@ -145,6 +145,7 @@
                 <v-alert v-if="alert.visible" :type="alert.type" dismissible @input="alert.visible = false">
                     {{ alert.message }}
                 </v-alert>
+                <br/>
                 <v-form ref="form" v-model="valid" lazy-validation>
                     <v-row>
                         <v-col cols="12">
@@ -180,7 +181,7 @@
                 </v-form>
             </v-card-text>
             <v-card-actions>
-                <v-btn color="blue darken-1" text @click="showAddTransactionDialog = false">Cancel</v-btn>
+                <v-btn color="blue darken-1" text @click="showAddTransactionDialog = false; clearAlerts();">Cancel</v-btn>
                 <v-btn color="blue darken-1" text @click="createTransaction">Create</v-btn>
             </v-card-actions>
         </v-card>
@@ -516,6 +517,17 @@ export default {
 
                 if (this.newTransaction.otherAccountName !== null) {
                     otherAccountId = this.accounts.find(account => account.name === this.newTransaction.otherAccountName).id;
+                
+                    if (accountId === otherAccountId) {
+                        this.alert = {
+                            visible: true,
+                            type: 'error',
+                            message: "Source and destination account can't be the same."
+                        };
+                        setTimeout(this.clearAlerts, 5000);
+
+                        return;
+                    }
                 }
 
                 let transactionTypeValue;
