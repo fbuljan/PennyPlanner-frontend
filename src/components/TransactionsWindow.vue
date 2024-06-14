@@ -7,13 +7,19 @@
             <v-card-title class="window-title">Transactions history</v-card-title>
             <v-card-text>
                 <v-row>
-                    <v-col cols="12" md="6">
+                    <v-col cols="12" md="6" class="d-flex">
                         <v-text-field v-model="localFilterPeriodStart" label="From" type="date"
-                            prepend-icon="mdi-calendar"></v-text-field>
+                            prepend-icon="mdi-calendar" class="flex-grow-1"></v-text-field>
+                        <v-btn icon @click="clearDate('start')" class="date-clear-button">
+                            <v-icon>mdi-close</v-icon>
+                        </v-btn>
                     </v-col>
-                    <v-col cols="12" md="6">
-                        <v-text-field v-model="localFilterPeriodEnd" label="To" type="date"
-                            prepend-icon="mdi-calendar"></v-text-field>
+                    <v-col cols="12" md="6" class="d-flex">
+                        <v-text-field v-model="localFilterPeriodEnd" label="To" type="date" prepend-icon="mdi-calendar"
+                            class="flex-grow-1"></v-text-field>
+                        <v-btn icon @click="clearDate('end')" class="date-clear-button">
+                            <v-icon>mdi-close</v-icon>
+                        </v-btn>
                     </v-col>
                 </v-row>
                 <v-row>
@@ -65,7 +71,7 @@
                             <v-card-text>
                                 <div class="stats-item">
                                     <strong>Most used account:</strong> {{ filteredMostUsedAccount.name }} ({{
-                                    filteredMostUsedAccount.transactions.length }} transactions)
+                                        filteredMostUsedAccount.transactions.length }} transactions)
                                 </div>
                                 <div class="stats-item">
                                     <strong>Transaction categories:</strong>
@@ -78,7 +84,7 @@
                                 </div>
                                 <div class="stats-item" v-if="!isNaN(filteredTotalExpenditure)">
                                     <strong>Total expenditure for period:</strong> {{
-                                    filteredTotalExpenditure.toFixed(2) }} €
+                                        filteredTotalExpenditure.toFixed(2) }} €
                                 </div>
                             </v-card-text>
                         </v-card>
@@ -319,39 +325,48 @@ export default {
             return this.localFilterAccount !== '' || this.localFilterCategory !== '' || this.localFilterTransactionType !== '';
         },
         filteredTransactions() {
-            if ((!this.localFilterPeriodStart || !this.localFilterPeriodEnd) && this.localFilterTransactionType !== 'Template') {
-                return [];
-            }
-            const startDate = new Date(this.localFilterPeriodStart);
-            startDate.setDate(startDate.getDate() - 1);
-            const endDate = new Date(this.localFilterPeriodEnd);
-            endDate.setDate(endDate.getDate() + 1);
+            const startDate = this.localFilterPeriodStart ? new Date(this.localFilterPeriodStart) : null;
+            const endDate = this.localFilterPeriodEnd ? new Date(this.localFilterPeriodEnd) : null;
+
             return this.transactions
                 .filter(transaction => {
                     const transactionDate = new Date(transaction.date);
                     let matchesFilters = this.localFilterTransactionType === 'Template' ? transaction.transactionType === 0 :
-                        transaction.transactionType !== 0 && transactionDate >= startDate && transactionDate <= endDate;
+                        transaction.transactionType !== 0;
 
-                    if (this.localFilterAccount) {
-                        const account = this.accounts.find(account => account.transactions.some(accTransaction => accTransaction.id === transaction.id));
-                        matchesFilters = matchesFilters && account && account.name === this.localFilterAccount;
+                    if (matchesFilters && (startDate || endDate)) {
+                        if (startDate && endDate) {
+                            matchesFilters = transactionDate >= startDate && transactionDate <= endDate;
+                        } else if (startDate) {
+                            matchesFilters = transactionDate >= startDate;
+                        } else if (endDate) {
+                            matchesFilters = transactionDate <= endDate;
+                        }
                     }
-                    if (this.localFilterCategory) {
+
+                    if (matchesFilters && this.localFilterAccount) {
+                        const account = this.accounts.find(account => account.transactions.some(accTransaction => accTransaction.id === transaction.id));
+                        matchesFilters = account && account.name === this.localFilterAccount;
+                    }
+
+                    if (matchesFilters && this.localFilterCategory) {
                         const category = this.categories.find(category => category.name === this.localFilterCategory);
                         if (category) {
-                            matchesFilters = matchesFilters && transaction.transactionCategory === category.value;
+                            matchesFilters = transaction.transactionCategory === category.value;
                         } else {
                             matchesFilters = false;
                         }
                     }
-                    if (this.localFilterTransactionType) {
+
+                    if (matchesFilters && this.localFilterTransactionType) {
                         let transactionTypeValue;
                         if (this.localFilterTransactionType === 'Income') transactionTypeValue = 1;
                         else if (this.localFilterTransactionType === 'Expense') transactionTypeValue = -1;
                         else if (this.localFilterTransactionType === 'Template') transactionTypeValue = 0;
 
-                        matchesFilters = matchesFilters && transaction.transactionType === transactionTypeValue;
+                        matchesFilters = transaction.transactionType === transactionTypeValue;
                     }
+
                     return matchesFilters;
                 })
                 .map(transaction => {
@@ -446,6 +461,13 @@ export default {
                 visible: false,
                 type: '',
                 message: ''
+            }
+        },
+        clearDate(type) {
+            if (type === 'start') {
+                this.localFilterPeriodStart = '';
+            } else if (type === 'end') {
+                this.localFilterPeriodEnd = '';
             }
         },
         createTransaction() {
@@ -714,6 +736,10 @@ export default {
 }
 
 .transaction-item .v-list-item-action .v-btn {
+    margin-left: 8px;
+}
+
+.date-clear-button {
     margin-left: 8px;
 }
 </style>
