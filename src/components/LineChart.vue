@@ -16,7 +16,7 @@
                 </v-btn>
             </v-col>
         </v-row>
-        <v-checkbox v-model="showPredictions" label="Show predictions for 3 months" class="mt-2"></v-checkbox>
+        <v-checkbox v-model="showPredictions" label="Show predictions for 6 months" class="mt-2"></v-checkbox>
         <div class="chart-wrapper">
             <Line :data="chartData" :options="chartOptions"></Line>
         </div>
@@ -127,30 +127,93 @@ export default {
         },
         getPredictedBalances(data) {
             const predictions = [];
-            const numPredictions = 3;
+            const numPredictions = 6;
+            const degree = 2;
 
-            const x = data.map((_, index) => index);
-            const y = data;
+            const smoothedData = this.weightedMovingAverage(data, 5);
+
+            const x = smoothedData.map((_, index) => index);
+            const y = smoothedData;
 
             const n = y.length;
-            const sumX = x.reduce((a, b) => a + b, 0);
-            const sumY = y.reduce((a, b) => a + b, 0);
-            const sumXY = x.map((xi, i) => xi * y[i]).reduce((a, b) => a + b, 0);
-            const sumXX = x.map(xi => xi * xi).reduce((a, b) => a + b, 0);
+            const X = [];
+            const Y = y;
 
-            const slope = (n * sumXY - sumX * sumY) / (n * sumXX - sumX * sumX);
-            const intercept = (sumY - slope * sumX) / n;
+            for (let i = 0; i < n; i++) {
+                X[i] = [];
+                for (let j = 0; j <= degree; j++) {
+                    X[i].push(Math.pow(x[i], j));
+                }
+            }
+
+            const XT = X[0].map((_, colIndex) => X.map(row => row[colIndex]));
+            const XTX = XT.map(row => row.map((_, colIndex) => row.reduce((sum, cell, i) => sum + cell * X[i][colIndex], 0)));
+            const XTY = XT.map(row => row.reduce((sum, cell, i) => sum + cell * Y[i], 0));
+            const B = this.gaussianElimination(XTX, XTY);
 
             for (let i = 1; i <= numPredictions; i++) {
                 const predictedX = x.length + i;
-                const predictedY = slope * predictedX + intercept;
-
+                let predictedY = 0;
+                for (let j = 0; j <= degree; j++) {
+                    predictedY += B[j] * Math.pow(predictedX, j);
+                }
                 predictions.push(Math.round(predictedY));
             }
 
-            console.log("Predictions: ", predictions);
-
             return predictions;
+        },
+        weightedMovingAverage(data, windowSize) {
+            const weights = Array.from({ length: windowSize }, (_, i) => i + 1);
+            const smoothedData = [];
+
+            for (let i = 0; i < data.length; i++) {
+                let weightedSum = 0;
+                let currentWeightSum = 0;
+                for (let j = 0; j < windowSize && i - j >= 0; j++) {
+                    weightedSum += data[i - j] * weights[j];
+                    currentWeightSum += weights[j];
+                }
+                smoothedData.push(weightedSum / currentWeightSum);
+            }
+
+            return smoothedData;
+        },
+        gaussianElimination(a, b) {
+            const n = a.length;
+            for (let i = 0; i < n; i++) {
+                let maxEl = Math.abs(a[i][i]);
+                let maxRow = i;
+                for (let k = i + 1; k < n; k++) {
+                    if (Math.abs(a[k][i]) > maxEl) {
+                        maxEl = Math.abs(a[k][i]);
+                        maxRow = k;
+                    }
+                }
+
+                [a[i], a[maxRow]] = [a[maxRow], a[i]];
+                [b[i], b[maxRow]] = [b[maxRow], b[i]];
+
+                for (let k = i + 1; k < n; k++) {
+                    const c = -a[k][i] / a[i][i];
+                    for (let j = i; j < n; j++) {
+                        if (i === j) {
+                            a[k][j] = 0;
+                        } else {
+                            a[k][j] += c * a[i][j];
+                        }
+                    }
+                    b[k] += c * b[i];
+                }
+            }
+
+            const x = new Array(n).fill(0);
+            for (let i = n - 1; i >= 0; i--) {
+                x[i] = b[i] / a[i][i];
+                for (let k = i - 1; k >= 0; k--) {
+                    b[k] -= a[k][i] * x[i];
+                }
+            }
+            return x;
         },
         generatePredictionLabels(numPredictions) {
             const labels = [];
