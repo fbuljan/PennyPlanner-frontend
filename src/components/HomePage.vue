@@ -213,15 +213,19 @@ export default {
             // Most used account
             let maxTransactions = 0;
             this.accounts.forEach(account => {
-            if (!account.transactions || account.transactions.length === 0) {
-                return;
-            }
+                if (!account.transactions || account.transactions.length === 0) {
+                    return;
+                }
 
-            if (account.transactions.length > maxTransactions) {
-                maxTransactions = account.transactions.length;
-                this.mostUsedAccount = account;
+                if (account.transactions.length > maxTransactions) {
+                    maxTransactions = account.transactions.length;
+                    this.mostUsedAccount = account;
+                }
+            });
+
+            if (this.mostUsedAccount && this.mostUsedAccount.transactions) {
+                this.mostUsedAccount.transactions = this.mostUsedAccount.transactions.filter(transaction => transaction.transactionType !== 0);
             }
-        });
 
             // Most common transaction category
             const categoryCount = {};
