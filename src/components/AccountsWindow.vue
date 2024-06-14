@@ -235,13 +235,22 @@ export default {
                 })
                 .catch(error => {
                     console.error('Error creating account', error);
-                    const errorArray = JSON.parse(error.response.data.detail);
-                    const errorMessages = errorArray.map(error => error.ErrorMessage);
-                    this.apiAlert = {
-                        visible: true,
-                        type: 'error',
-                        message: 'Error creating account: ' + errorMessages[0]
-                    };
+                    try {
+                        const errorArray = JSON.parse(error.response.data.detail);
+                        const errorMessages = errorArray.map(error => error.ErrorMessage);
+                        this.apiAlert = {
+                            visible: true,
+                            type: 'error',
+                            message: 'Error creating account: ' + errorMessages[0]
+                        };
+                    }
+                    catch (error2) {
+                        this.apiAlert = {
+                            visible: true,
+                            type: 'error',
+                            message: 'Error creating account: ' + error.response.data.title
+                        };
+                    }
                     setTimeout(this.clearAlerts, 5000);
                     this.showAddAccountDialog = false;
                 });
