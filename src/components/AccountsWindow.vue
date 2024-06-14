@@ -10,9 +10,9 @@
                                 :class="{ 'selected-account': selectedAccount && selectedAccount.id === account.id }"
                                 class="account-item">
                                 <v-list-item-content class="accounts-content">
-                                    <v-list-item-title>{{ account.name }}</v-list-item-title>
-                                    <v-list-item-subtitle>{{ account.description }}</v-list-item-subtitle>
-                                    <v-list-item-subtitle>{{ account.balance }} €</v-list-item-subtitle>
+                                    <v-list-item-title class="larger-text-accounts">{{ account.name }}</v-list-item-title>
+                                    <v-list-item-subtitle class="larger-text-accounts">{{ account.description }}</v-list-item-subtitle>
+                                    <v-list-item-subtitle class="larger-text-accounts balance">{{ account.balance }} €</v-list-item-subtitle>
                                     <v-list-item-action class="account-item">
                                         <v-btn icon small @click.stop="openEditDialog(account)">
                                             <v-icon>mdi-pencil</v-icon>
@@ -44,7 +44,6 @@
             </v-card-actions>
         </v-card>
 
-        <!-- Add Account Dialog -->
         <v-dialog v-model="showAddAccountDialog" persistent max-width="600px">
             <v-card>
                 <v-card-title class="window-title">Add New Account</v-card-title>
@@ -75,7 +74,6 @@
             </v-card>
         </v-dialog>
 
-        <!-- Edit Account Dialog -->
         <v-dialog v-model="showEditAccountDialog" persistent max-width="600px">
             <v-card>
                 <v-card-title class="window-title">Edit Account</v-card-title>
@@ -106,7 +104,6 @@
             </v-card>
         </v-dialog>
 
-        <!-- Delete Account Dialog -->
         <v-dialog v-model="showDeleteAccountDialog" persistent max-width="400px">
             <v-card>
                 <v-card-title class="window-title">Delete Account</v-card-title>
@@ -129,7 +126,7 @@
 </template>
 
 <script>
-import LineChart from './LineChart.vue'; // Ensure you have a LineChart component
+import LineChart from './LineChart.vue';
 
 export default {
     name: 'AccountsWindow',
@@ -285,5 +282,16 @@ export default {
 
 .date-clear-button {
     margin-left: 8px;
+}
+
+.larger-text-accounts {
+    font-size: 1.5rem;
+    font-weight: bold;
+    padding-bottom: 2px;
+    line-height: 1.5;
+}
+
+.balance {
+    color: #3f51b5;
 }
 </style>
