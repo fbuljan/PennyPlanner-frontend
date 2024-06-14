@@ -217,15 +217,12 @@ export default {
                     return;
                 }
 
+                account.transactions = account.transactions.filter(transaction => transaction.transactionType !== 0);
                 if (account.transactions.length > maxTransactions) {
                     maxTransactions = account.transactions.length;
                     this.mostUsedAccount = account;
                 }
             });
-
-            if (this.mostUsedAccount && this.mostUsedAccount.transactions) {
-                this.mostUsedAccount.transactions = this.mostUsedAccount.transactions.filter(transaction => transaction.transactionType !== 0);
-            }
 
             // Most common transaction category
             const categoryCount = {};
