@@ -143,7 +143,6 @@ export default {
     },
     data() {
         return {
-            localShowAccountsWindow: this.showAccountsWindow,
             selectedAccount: null,
             showAddAccountDialog: false,
             showEditAccountDialog: false,
@@ -167,6 +166,16 @@ export default {
                 message: ''
             }
         };
+    },
+    computed: {
+        localShowAccountsWindow: {
+            get() {
+                return this.showAccountsWindow;
+            },
+            set(value) {
+                this.$emit('update:showAccountsWindow', value);
+            }
+        }
     },
     methods: {
         selectAccount(account) {
