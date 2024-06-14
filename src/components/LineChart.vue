@@ -2,8 +2,8 @@
     <div class="chart-container">
         <v-row>
             <v-col cols="12" md="6" class="d-flex">
-                <v-text-field v-model="localFilterPeriodStart" label="From" type="date"
-                    prepend-icon="mdi-calendar" class="flex-grow-1"></v-text-field>
+                <v-text-field v-model="localFilterPeriodStart" label="From" type="date" prepend-icon="mdi-calendar"
+                    class="flex-grow-1"></v-text-field>
                 <v-btn icon @click="clearDate('start')" class="date-clear-button">
                     <v-icon>mdi-close</v-icon>
                 </v-btn>
@@ -16,6 +16,7 @@
                 </v-btn>
             </v-col>
         </v-row>
+        <v-checkbox v-model="showPredictions" label="Show predictions for 3 months" class="mt-2"></v-checkbox>
         <div class="chart-wrapper">
             <Line :data="chartData" :options="chartOptions"></Line>
         </div>
@@ -50,7 +51,8 @@ export default {
                 datasets: []
             },
             localFilterPeriodStart: null,
-            localFilterPeriodEnd: null
+            localFilterPeriodEnd: null,
+            showPredictions: false
         }
     },
     watch: {
@@ -64,6 +66,9 @@ export default {
             this.updateChartData(this.transactions, this.currentBalance)
         },
         localFilterPeriodEnd() {
+            this.updateChartData(this.transactions, this.currentBalance)
+        },
+        showPredictions() {
             this.updateChartData(this.transactions, this.currentBalance)
         }
     },
@@ -101,16 +106,60 @@ export default {
             labels.push("Current Balance");
             data.push(currentBalance);
 
+            const predictions = this.getPredictedBalances(data);
+            const predictedLabels = this.generatePredictionLabels(predictions.length);
+
             this.chartData = {
-                labels,
+                labels: this.showPredictions ? labels.concat(predictedLabels) : labels,
                 datasets: [
                     {
                         label: 'Balance Over Time',
                         backgroundColor: '#f87979',
-                        data
-                    }
+                        data: data
+                    },
+                    ...this.showPredictions ? [{
+                        label: 'Predicted Balance',
+                        backgroundColor: '#7cb342',
+                        data: new Array(data.length).fill(null).concat(predictions)
+                    }] : []
                 ]
             };
+        },
+        getPredictedBalances(data) {
+            const predictions = [];
+            const numPredictions = 3;
+
+            const x = data.map((_, index) => index);
+            const y = data;
+
+            const n = y.length;
+            const sumX = x.reduce((a, b) => a + b, 0);
+            const sumY = y.reduce((a, b) => a + b, 0);
+            const sumXY = x.map((xi, i) => xi * y[i]).reduce((a, b) => a + b, 0);
+            const sumXX = x.map(xi => xi * xi).reduce((a, b) => a + b, 0);
+
+            const slope = (n * sumXY - sumX * sumY) / (n * sumXX - sumX * sumX);
+            const intercept = (sumY - slope * sumX) / n;
+
+            for (let i = 1; i <= numPredictions; i++) {
+                const predictedX = x.length + i;
+                const predictedY = slope * predictedX + intercept;
+
+                predictions.push(Math.round(predictedY));
+            }
+
+            console.log("Predictions: ", predictions);
+
+            return predictions;
+        },
+        generatePredictionLabels(numPredictions) {
+            const labels = [];
+            const currentDate = new Date();
+            for (let i = 1; i <= numPredictions; i++) {
+                const futureDate = new Date(currentDate.getFullYear(), currentDate.getMonth() + i, 1);
+                labels.push(futureDate.toLocaleDateString());
+            }
+            return labels;
         },
         clearDate(type) {
             if (type === 'start') {
@@ -143,7 +192,7 @@ export default {
     display: flex;
 }
 
-.chart-wrapper > * {
+.chart-wrapper>* {
     flex-grow: 1;
 }
 
