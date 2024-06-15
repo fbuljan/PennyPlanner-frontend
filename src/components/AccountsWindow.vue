@@ -208,6 +208,11 @@ export default {
                 return;
             }
 
+            if (this.selectedAccount && account.id === this.selectedAccount.id) {
+                this.selectedAccount = null;
+                return;
+            }
+
             this.selectedAccount = account;
         },
         closeAccountsWindow() {
