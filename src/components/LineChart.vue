@@ -80,7 +80,10 @@ export default {
                 filteredTransactions = filteredTransactions.filter(t => new Date(t.date) >= new Date(this.localFilterPeriodStart));
             }
 
+            let removedByFilterEnd = [];
+
             if (this.localFilterPeriodEnd) {
+                removedByFilterEnd = filteredTransactions.filter(t => new Date(t.date) > new Date(this.localFilterPeriodEnd));
                 filteredTransactions = filteredTransactions.filter(t => new Date(t.date) <= new Date(this.localFilterPeriodEnd));
             }
 
@@ -90,20 +93,34 @@ export default {
             const data = [];
             let balance = currentBalance;
 
+            if (removedByFilterEnd.length > 0) {
+                removedByFilterEnd.forEach(transaction => {
+                    if (transaction.transactionType !== 0) {
+                        if (transaction.transactionType === -1) {
+                            balance += transaction.amount;
+                        } else if (transaction.transactionType === 1) {
+                            balance -= transaction.amount;
+                        }
+                    }
+                });
+            }
+
+            currentBalance = balance;
+
             for (let i = filteredTransactions.length - 1; i >= 0; i--) {
-                const t = filteredTransactions[i];
-                if (t.transactionType !== 0) {
-                    labels.unshift(new Date(t.date).toLocaleDateString());
-                    if (t.transactionType === -1) {
-                        balance += t.amount;
-                    } else if (t.transactionType === 1) {
-                        balance -= t.amount;
+                const transaction = filteredTransactions[i];
+                if (transaction.transactionType !== 0) {
+                    labels.unshift(new Date(transaction.date).toLocaleDateString());
+                    if (transaction.transactionType === -1) {
+                        balance += transaction.amount;
+                    } else if (transaction.transactionType === 1) {
+                        balance -= transaction.amount;
                     }
                     data.unshift(balance);
                 }
             }
 
-            labels.push("Current Balance");
+            labels.push(this.localFilterPeriodEnd !== null ? new Date(this.localFilterPeriodEnd).toLocaleDateString() : "Current Balance");
             data.push(currentBalance);
 
             const predictions = this.getPredictedBalances(data);
