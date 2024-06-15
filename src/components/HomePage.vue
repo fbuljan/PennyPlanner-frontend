@@ -3,7 +3,7 @@
         <v-toolbar color="primary" dark prominent>
             <v-toolbar-title><strong>PennyPlanner</strong></v-toolbar-title>
             <v-spacer></v-spacer>
-            <v-btn>Currency calculator</v-btn>
+            <v-btn @click="showCurrencyCalculator = true">Currency calculator</v-btn>
             <v-btn @click="showTransactionsWindow = true">Transactions</v-btn>
             <v-btn @click="showAccountsWindow = true">Accounts</v-btn>
             <v-btn>Goals</v-btn>
@@ -121,7 +121,9 @@
         <AccountsWindow @accountCreated="fetchUser" @accountUpdated="fetchUser" @accountDeleted="fetchUser"
             v-model:showAccountsWindow="showAccountsWindow" :accounts="accounts" />
 
-        <v-overlay :value="showTransactionsWindow || showAccountsWindow">
+        <CurrencyCalculator v-model:showCalculator="showCurrencyCalculator" />
+
+        <v-overlay :value="showTransactionsWindow || showAccountsWindow || showCurrencyCalculator">
             <div class="blur-background"></div>
         </v-overlay>
     </div>
@@ -130,12 +132,14 @@
 <script>
 import TransactionsWindow from './TransactionsWindow.vue';
 import AccountsWindow from './AccountsWindow.vue';
+import CurrencyCalculator from './CurrencyCalculator.vue';
 
 export default {
     name: 'HomePage',
     components: {
         TransactionsWindow,
-        AccountsWindow
+        AccountsWindow,
+        CurrencyCalculator
     },
     data() {
         return {
@@ -151,6 +155,7 @@ export default {
             averageMonthlyExpenditure: 0,
             showTransactionsWindow: false,
             showAccountsWindow: false,
+            showCurrencyCalculator: false,
             filterPeriodStart: '',
             filterPeriodEnd: '',
             filterAccount: '',
