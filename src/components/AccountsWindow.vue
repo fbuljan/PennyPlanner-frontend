@@ -20,10 +20,12 @@
                                     <v-list-item-subtitle class="larger-text-accounts balance">{{ account.balance }}
                                         €</v-list-item-subtitle>
                                     <v-list-item-action class="account-item">
-                                        <v-btn icon small @click.stop="openEditDialog(account)">
+                                        <v-btn icon small @click.stop="openEditDialog(account)"
+                                            class="d-flex justify-center align-center">
                                             <v-icon>mdi-pencil</v-icon>
                                         </v-btn>
-                                        <v-btn icon small @click.stop="openDeleteDialog(account)">
+                                        <v-btn icon small @click.stop="openDeleteDialog(account)"
+                                            class="d-flex justify-center align-center">
                                             <v-icon>mdi-delete</v-icon>
                                         </v-btn>
                                     </v-list-item-action>
@@ -37,7 +39,8 @@
                         <v-card class="rectangle">
                             <v-card-title>Balance Over Time</v-card-title>
                             <v-card-text>
-                                <line-chart :transactions="selectedAccount.transactions" :current-balance="selectedAccount.balance"></line-chart>
+                                <line-chart :transactions="selectedAccount.transactions"
+                                    :current-balance="selectedAccount.balance"></line-chart>
                             </v-card-text>
                         </v-card>
                     </v-col>
@@ -76,7 +79,8 @@
                     </v-form>
                 </v-card-text>
                 <v-card-actions>
-                    <v-btn color="blue darken-1" text @click="showAddAccountDialog = false; this.clearAlerts()">Cancel</v-btn>
+                    <v-btn color="blue darken-1" text
+                        @click="showAddAccountDialog = false; this.clearAlerts()">Cancel</v-btn>
                     <v-btn color="blue darken-1" text @click="createAccount">Create</v-btn>
                 </v-card-actions>
             </v-card>
@@ -104,7 +108,8 @@
                     </v-form>
                 </v-card-text>
                 <v-card-actions>
-                    <v-btn color="blue darken-1" text @click="showEditAccountDialog = false; this.clearAlerts()">Cancel</v-btn>
+                    <v-btn color="blue darken-1" text
+                        @click="showEditAccountDialog = false; this.clearAlerts()">Cancel</v-btn>
                     <v-btn color="blue darken-1" text @click="updateAccount">Update</v-btn>
                 </v-card-actions>
             </v-card>
@@ -351,7 +356,7 @@ export default {
                     setTimeout(this.clearAlerts, 5000);
                 });
 
-                this.showDeleteAccountDialog = false;
+            this.showDeleteAccountDialog = false;
         },
         clearAlerts() {
             this.addAlert = {

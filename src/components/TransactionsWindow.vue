@@ -49,13 +49,15 @@
                                     </v-list-item-subtitle>
                                     <v-list-item-action class="transaction-item">
                                         <v-btn v-if="transaction.transactionType === 0" icon small
-                                            @click="applyTemplate(transaction)">
+                                            @click="applyTemplate(transaction)" class="d-flex justify-center">
                                             <v-icon>mdi-check</v-icon>
                                         </v-btn>
-                                        <v-btn icon small @click="openUpdateDialog(transaction)">
+                                        <v-btn icon small @click="openUpdateDialog(transaction)"
+                                            class="d-flex justify-center">
                                             <v-icon>mdi-pencil</v-icon>
                                         </v-btn>
-                                        <v-btn icon small @click="deleteTransaction(transaction)">
+                                        <v-btn icon small @click="deleteTransaction(transaction)"
+                                            class="d-flex justify-center">
                                             <v-icon>mdi-delete</v-icon>
                                         </v-btn>
                                     </v-list-item-action>
@@ -71,7 +73,7 @@
                             <v-card-text>
                                 <div class="stats-item">
                                     <strong>Most used account:</strong> {{ filteredMostUsedAccount.name }} ({{
-                                        filteredMostUsedAccount.transactions.length }} transactions)
+                                    filteredMostUsedAccount.transactions.length }} transactions)
                                 </div>
                                 <div class="stats-item">
                                     <strong>Transaction categories:</strong>
@@ -84,7 +86,7 @@
                                 </div>
                                 <div class="stats-item" v-if="!isNaN(filteredTotalExpenditure)">
                                     <strong>Total expenditure for period:</strong> {{
-                                        filteredTotalExpenditure.toFixed(2) }} €
+                                    filteredTotalExpenditure.toFixed(2) }} €
                                 </div>
                             </v-card-text>
                         </v-card>
@@ -93,6 +95,7 @@
                 <v-row>
                     <v-col cols="12">
                         <v-btn @click="showFilterDialog = true">Filter</v-btn>
+                        <v-btn @click="showTemplates" style="margin-left: 25px">Templates</v-btn>
                     </v-col>
                 </v-row>
             </v-card-text>
@@ -111,21 +114,21 @@
                         <v-col cols="12" class="d-flex">
                             <v-select v-model="localFilterAccount" :items="accountOptions" label="Account"
                                 class="flex-grow-1"></v-select>
-                            <v-btn icon @click="clearFilter('account')">
+                            <v-btn icon @click="clearFilter('account')" class="clear-filter-button">
                                 <v-icon>mdi-close</v-icon>
                             </v-btn>
                         </v-col>
                         <v-col cols="12" class="d-flex">
                             <v-select v-model="localFilterCategory" :items="categoryOptions" label="Category"
                                 class="flex-grow-1"></v-select>
-                            <v-btn icon @click="clearFilter('category')">
+                            <v-btn icon @click="clearFilter('category')" class="clear-filter-button">
                                 <v-icon>mdi-close</v-icon>
                             </v-btn>
                         </v-col>
                         <v-col cols="12" class="d-flex">
                             <v-select v-model="localFilterTransactionType" :items="transactionTypeOptions"
                                 label="Transaction Type" class="flex-grow-1"></v-select>
-                            <v-btn icon @click="clearFilter('transactionType')">
+                            <v-btn icon @click="clearFilter('transactionType')" class="clear-filter-button">
                                 <v-icon>mdi-close</v-icon>
                             </v-btn>
                         </v-col>
@@ -145,7 +148,7 @@
                 <v-alert v-if="alert.visible" :type="alert.type" dismissible @input="alert.visible = false">
                     {{ alert.message }}
                 </v-alert>
-                <br/>
+                <br />
                 <v-form ref="form" v-model="valid" lazy-validation>
                     <v-row>
                         <v-col cols="12">
@@ -181,7 +184,8 @@
                 </v-form>
             </v-card-text>
             <v-card-actions>
-                <v-btn color="blue darken-1" text @click="showAddTransactionDialog = false; clearAlerts();">Cancel</v-btn>
+                <v-btn color="blue darken-1" text
+                    @click="showAddTransactionDialog = false; clearAlerts();">Cancel</v-btn>
                 <v-btn color="blue darken-1" text @click="createTransaction">Create</v-btn>
             </v-card-actions>
         </v-card>
@@ -728,6 +732,14 @@ export default {
             const month = ('0' + (date.getMonth() + 1)).slice(-2);
             const day = ('0' + date.getDate()).slice(-2);
             return `${year}-${month}-${day}`;
+        },
+        showTemplates() {
+            if (this.localFilterTransactionType === 'Template') {
+                this.localFilterTransactionType = '';
+                return;
+            }
+
+            this.localFilterTransactionType = 'Template';
         }
     },
     watch: {
@@ -804,5 +816,9 @@ export default {
 
 .date-clear-button {
     margin-left: 8px;
+}
+
+.clear-filter-button {
+    margin-left: 10px;
 }
 </style>
