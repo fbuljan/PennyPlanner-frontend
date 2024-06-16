@@ -8,14 +8,14 @@
             <v-card-text>
                 <v-row>
                     <v-col cols="12" md="6" class="d-flex">
-                        <v-text-field v-model="localFilterPeriodStart" label="From" type="date"
+                        <v-text-field v-model="filterPeriodStart" label="From" type="date"
                             prepend-icon="mdi-calendar" class="flex-grow-1"></v-text-field>
                         <v-btn icon @click="clearDate('start')" class="date-clear-button">
                             <v-icon>mdi-close</v-icon>
                         </v-btn>
                     </v-col>
                     <v-col cols="12" md="6" class="d-flex">
-                        <v-text-field v-model="localFilterPeriodEnd" label="To" type="date" prepend-icon="mdi-calendar"
+                        <v-text-field v-model="filterPeriodEnd" label="To" type="date" prepend-icon="mdi-calendar"
                             class="flex-grow-1"></v-text-field>
                         <v-btn icon @click="clearDate('end')" class="date-clear-button">
                             <v-icon>mdi-close</v-icon>
@@ -112,21 +112,21 @@
                 <v-card-text>
                     <v-row>
                         <v-col cols="12" class="d-flex">
-                            <v-select v-model="localFilterAccount" :items="accountOptions" label="Account"
+                            <v-select v-model="filterAccount" :items="accountOptions" label="Account"
                                 class="flex-grow-1"></v-select>
                             <v-btn icon @click="clearFilter('account')" class="clear-filter-button">
                                 <v-icon>mdi-close</v-icon>
                             </v-btn>
                         </v-col>
                         <v-col cols="12" class="d-flex">
-                            <v-select v-model="localFilterCategory" :items="categoryOptions" label="Category"
+                            <v-select v-model="filterCategory" :items="categoryOptions" label="Category"
                                 class="flex-grow-1"></v-select>
                             <v-btn icon @click="clearFilter('category')" class="clear-filter-button">
                                 <v-icon>mdi-close</v-icon>
                             </v-btn>
                         </v-col>
                         <v-col cols="12" class="d-flex">
-                            <v-select v-model="localFilterTransactionType" :items="transactionTypeOptions"
+                            <v-select v-model="filterTransactionType" :items="transactionTypeOptions"
                                 label="Transaction Type" class="flex-grow-1"></v-select>
                             <v-btn icon @click="clearFilter('transactionType')" class="clear-filter-button">
                                 <v-icon>mdi-close</v-icon>
@@ -263,19 +263,14 @@ export default {
         transactions: Array,
         accounts: Array,
         categories: Array,
-        filterPeriodStart: String,
-        filterPeriodEnd: String,
-        filterAccount: String,
-        filterCategory: String,
-        filterTransactionType: String
     },
     data() {
         return {
-            localFilterPeriodStart: this.filterPeriodStart,
-            localFilterPeriodEnd: this.filterPeriodEnd,
-            localFilterAccount: this.filterAccount,
-            localFilterCategory: this.filterCategory,
-            localFilterTransactionType: this.filterTransactionType,
+            filterPeriodStart: null,
+            filterPeriodEnd: null,
+            filterAccount: '',
+            filterCategory: '',
+            filterTransactionType: '',
             showFilterDialog: false,
             showAddTransactionDialog: false,
             newTransaction: {
@@ -327,16 +322,16 @@ export default {
             }
         },
         filtersApplied() {
-            return this.localFilterAccount !== '' || this.localFilterCategory !== '' || this.localFilterTransactionType !== '';
+            return this.filterAccount !== '' || this.filterCategory !== '' || this.filterTransactionType !== '';
         },
         filteredTransactions() {
-            const startDate = this.localFilterPeriodStart ? new Date(this.localFilterPeriodStart) : null;
-            const endDate = this.localFilterPeriodEnd ? new Date(this.localFilterPeriodEnd) : null;
+            const startDate = this.filterPeriodStart ? new Date(this.filterPeriodStart) : null;
+            const endDate = this.filterPeriodEnd ? new Date(this.filterPeriodEnd) : null;
 
             return this.transactions
                 .filter(transaction => {
                     const transactionDate = new Date(transaction.date);
-                    let matchesFilters = this.localFilterTransactionType === 'Template' ? transaction.transactionType === 0 :
+                    let matchesFilters = this.filterTransactionType === 'Template' ? transaction.transactionType === 0 :
                         transaction.transactionType !== 0;
 
                     if (matchesFilters && (startDate || endDate)) {
@@ -349,13 +344,13 @@ export default {
                         }
                     }
 
-                    if (matchesFilters && this.localFilterAccount) {
+                    if (matchesFilters && this.filterAccount) {
                         const account = this.accounts.find(account => account.transactions && account.transactions.some(accTransaction => accTransaction.id === transaction.id));
-                        matchesFilters = account && account.name === this.localFilterAccount;
+                        matchesFilters = account && account.name === this.filterAccount;
                     }
 
-                    if (matchesFilters && this.localFilterCategory) {
-                        const category = this.categories.find(category => category.name === this.localFilterCategory);
+                    if (matchesFilters && this.filterCategory) {
+                        const category = this.categories.find(category => category.name === this.filterCategory);
                         if (category) {
                             matchesFilters = transaction.transactionCategory === category.value;
                         } else {
@@ -363,11 +358,11 @@ export default {
                         }
                     }
 
-                    if (matchesFilters && this.localFilterTransactionType) {
+                    if (matchesFilters && this.filterTransactionType) {
                         let transactionTypeValue;
-                        if (this.localFilterTransactionType === 'Income') transactionTypeValue = 1;
-                        else if (this.localFilterTransactionType === 'Expense') transactionTypeValue = -1;
-                        else if (this.localFilterTransactionType === 'Template') transactionTypeValue = 0;
+                        if (this.filterTransactionType === 'Income') transactionTypeValue = 1;
+                        else if (this.filterTransactionType === 'Expense') transactionTypeValue = -1;
+                        else if (this.filterTransactionType === 'Template') transactionTypeValue = 0;
 
                         matchesFilters = transaction.transactionType === transactionTypeValue;
                     }
@@ -389,8 +384,8 @@ export default {
                     return acc;
                 }
 
-                const filterStart = this.localFilterPeriodStart ? new Date(this.localFilterPeriodStart) : new Date(-8640000000000000); // Min date
-                const filterEnd = this.localFilterPeriodEnd ? new Date(this.localFilterPeriodEnd) : new Date(8640000000000000); // Max date
+                const filterStart = this.filterPeriodStart ? new Date(this.filterPeriodStart) : new Date(-8640000000000000); // Min date
+                const filterEnd = this.filterPeriodEnd ? new Date(this.filterPeriodEnd) : new Date(8640000000000000); // Max date
 
                 const filteredTransactions = account.transactions.filter(transaction => {
                     const transactionDate = new Date(transaction.date);
@@ -418,8 +413,8 @@ export default {
                 name: mostUsedAccount.name,
                 transactions: mostUsedAccount.transactions.filter(transaction => {
                     const transactionDate = new Date(transaction.date);
-                    const filterStart = this.localFilterPeriodStart ? new Date(this.localFilterPeriodStart) : new Date(-8640000000000000);
-                    const filterEnd = this.localFilterPeriodEnd ? new Date(this.localFilterPeriodEnd) : new Date(8640000000000000);
+                    const filterStart = this.filterPeriodStart ? new Date(this.filterPeriodStart) : new Date(-8640000000000000);
+                    const filterEnd = this.filterPeriodEnd ? new Date(this.filterPeriodEnd) : new Date(8640000000000000);
 
                     return transaction.transactionType !== 0 &&
                         transactionDate >= filterStart &&
@@ -477,6 +472,7 @@ export default {
         closeTransactionsWindow() {
             this.localShowTransactionsWindow = false;
             this.clearAlerts();
+            this.clearFilter('all');
         },
         clearAlerts() {
             this.alert = {
@@ -497,9 +493,9 @@ export default {
         },
         clearDate(type) {
             if (type === 'start') {
-                this.localFilterPeriodStart = '';
+                this.filterPeriodStart = '';
             } else if (type === 'end') {
-                this.localFilterPeriodEnd = '';
+                this.filterPeriodEnd = '';
             }
         },
         createTransaction() {
@@ -720,11 +716,17 @@ export default {
         },
         clearFilter(filterType) {
             if (filterType === 'account') {
-                this.localFilterAccount = '';
+                this.filterAccount = '';
             } else if (filterType === 'category') {
-                this.localFilterCategory = '';
+                this.filterCategory = '';
             } else if (filterType === 'transactionType') {
-                this.localFilterTransactionType = '';
+                this.filterTransactionType = '';
+            } else if (filterType === 'all') {
+                this.filterAccount = '';
+                this.filterCategory = '';
+                this.filterTransactionType = '';
+                this.filterPeriodStart = null;
+                this.filterPeriodEnd = null;
             }
         },
         formatDate(dateString) {
@@ -735,29 +737,29 @@ export default {
             return `${year}-${month}-${day}`;
         },
         showTemplates() {
-            if (this.localFilterTransactionType === 'Template') {
-                this.localFilterTransactionType = '';
+            if (this.filterTransactionType === 'Template') {
+                this.filterTransactionType = '';
                 return;
             }
 
-            this.localFilterTransactionType = 'Template';
+            this.filterTransactionType = 'Template';
         }
     },
     watch: {
         filterPeriodStart(newVal) {
-            this.localFilterPeriodStart = newVal;
+            this.filterPeriodStart = newVal;
         },
         filterPeriodEnd(newVal) {
-            this.localFilterPeriodEnd = newVal;
+            this.filterPeriodEnd = newVal;
         },
         filterAccount(newVal) {
-            this.localFilterAccount = newVal;
+            this.filterAccount = newVal;
         },
         filterCategory(newVal) {
-            this.localFilterCategory = newVal;
+            this.filterCategory = newVal;
         },
         filterTransactionType(newVal) {
-            this.localFilterTransactionType = newVal;
+            this.filterTransactionType = newVal;
         },
         showFilterWindow(newVal) {
             this.localShowFilterWindow = newVal;

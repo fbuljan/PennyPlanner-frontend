@@ -113,10 +113,8 @@
 
         <TransactionsWindow @transactionCreated="fetchUser" @transactionDeleted="fetchUser"
             @transactionUpdated="fetchUser" v-model:showTransactionsWindow="showTransactionsWindow"
-            :transactions="transactions" :accounts="accounts" :categories="categories"
-            :filterPeriodStart="filterPeriodStart" :filterPeriodEnd="filterPeriodEnd" :filterAccount="filterAccount"
-            :filterCategory="filterCategory" :filterTransactionType="filterTransactionType"
-            @close-transactions-window="showTransactionsWindow = false" />
+            @close-transactions-window="showTransactionsWindow = false" :transactions="transactions"
+            :accounts="accounts" :categories="categories" />
 
         <AccountsWindow @accountCreated="fetchUser" @accountUpdated="fetchUser" @accountDeleted="fetchUser"
             v-model:showAccountsWindow="showAccountsWindow" :accounts="accounts" />
@@ -155,13 +153,7 @@ export default {
             averageMonthlyExpenditure: 0,
             showTransactionsWindow: false,
             showAccountsWindow: false,
-            showCurrencyCalculator: false,
-            filterPeriodStart: '',
-            filterPeriodEnd: '',
-            filterAccount: '',
-            filterCategory: '',
-            filterTransactionType: '',
-            transactionTypeOptions: ['Income', 'Expense', 'Template']
+            showCurrencyCalculator: false
         };
     },
     computed: {
