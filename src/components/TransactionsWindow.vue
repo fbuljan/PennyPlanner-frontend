@@ -1,15 +1,18 @@
 <template>
     <v-dialog v-model="localShowTransactionsWindow" persistent max-width="800px">
         <v-card>
-            <v-alert v-if="apiAlert.visible" :type="apiAlert.type" dismissible @input="apiAlert.visible = false">
-                {{ apiAlert.message }}
-            </v-alert>
+            <div>
+                <v-alert v-if="apiAlert.visible" :type="apiAlert.type" dismissible @input="apiAlert.visible = false"
+                    style="height: 60px;">
+                    {{ apiAlert.message }}
+                </v-alert>
+            </div>
             <v-card-title class="window-title">Transactions history</v-card-title>
             <v-card-text>
                 <v-row>
                     <v-col cols="12" md="6" class="d-flex">
-                        <v-text-field v-model="filterPeriodStart" label="From" type="date"
-                            prepend-icon="mdi-calendar" class="flex-grow-1"></v-text-field>
+                        <v-text-field v-model="filterPeriodStart" label="From" type="date" prepend-icon="mdi-calendar"
+                            class="flex-grow-1"></v-text-field>
                         <v-btn icon @click="clearDate('start')" class="date-clear-button">
                             <v-icon>mdi-close</v-icon>
                         </v-btn>
@@ -45,7 +48,8 @@
                                         {{ transaction.description ? transaction.description : 'No description' }}
                                     </v-list-item-subtitle>
                                     <v-list-item-subtitle class="larger-text-transaction">
-                                        {{ transaction.transactionType !== 0 ? new Date(transaction.date).toLocaleDateString() : ""}}
+                                        {{ transaction.transactionType !== 0 ? new
+                                        Date(transaction.date).toLocaleDateString() : ""}}
                                     </v-list-item-subtitle>
                                     <v-list-item-action class="transaction-item">
                                         <v-btn v-if="transaction.transactionType === 0" icon small
