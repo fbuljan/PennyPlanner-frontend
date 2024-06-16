@@ -29,7 +29,7 @@
                                 class="transaction-item">
                                 <v-list-item-content class="transactions-content">
                                     <v-list-item-title class="transaction-title"
-                                        :style="transaction.transactionType == 0 ? 'color: black;' : transaction.transactionType < 0 ? 'color: red;' : 'color: green;'">
+                                        :style="transaction.transactionType === 0 ? 'color: black;' : transaction.transactionType < 0 ? 'color: red;' : 'color: green;'">
                                         <template v-if="transaction.transactionType === -1">
                                             <v-icon color="red">mdi-arrow-down</v-icon>
                                         </template>
@@ -45,7 +45,7 @@
                                         {{ transaction.description ? transaction.description : 'No description' }}
                                     </v-list-item-subtitle>
                                     <v-list-item-subtitle class="larger-text-transaction">
-                                        {{ new Date(transaction.date).toLocaleDateString() }}
+                                        {{ transaction.transactionType !== 0 ? new Date(transaction.date).toLocaleDateString() : ""}}
                                     </v-list-item-subtitle>
                                     <v-list-item-action class="transaction-item">
                                         <v-btn v-if="transaction.transactionType === 0" icon small
@@ -380,7 +380,8 @@ export default {
                         ...transaction,
                         accountName: account ? account.name : 'Unknown'
                     };
-                });
+                })
+                .sort((a, b) => new Date(b.date) - new Date(a.date));
         },
         filteredMostUsedAccount() {
             const accountTransactionCounts = this.accounts.reduce((acc, account) => {
