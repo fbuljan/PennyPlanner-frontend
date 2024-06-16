@@ -11,7 +11,7 @@
                 <v-btn icon>
                     <v-icon>mdi-calendar</v-icon>
                 </v-btn>
-                <v-btn icon>
+                <v-btn icon @click="showUserProfile = true">
                     <v-icon>mdi-menu</v-icon>
                 </v-btn>
             </v-container>
@@ -121,7 +121,10 @@
 
         <CurrencyCalculator v-model:showCalculator="showCurrencyCalculator" />
 
-        <v-overlay :value="showTransactionsWindow || showAccountsWindow || showCurrencyCalculator">
+        <UserProfile v-model:showUserProfile="showUserProfile" :user="user" @logout="handleLogout"
+            @userDeleted="handleUserDeletion" />
+
+        <v-overlay :value="showTransactionsWindow || showAccountsWindow || showCurrencyCalculator || showUserProfile">
             <div class="blur-background"></div>
         </v-overlay>
     </div>
@@ -131,13 +134,15 @@
 import TransactionsWindow from './TransactionsWindow.vue';
 import AccountsWindow from './AccountsWindow.vue';
 import CurrencyCalculator from './CurrencyCalculator.vue';
+import UserProfile from './UserProfile.vue';
 
 export default {
     name: 'HomePage',
     components: {
         TransactionsWindow,
         AccountsWindow,
-        CurrencyCalculator
+        CurrencyCalculator,
+        UserProfile
     },
     data() {
         return {
@@ -153,7 +158,9 @@ export default {
             averageMonthlyExpenditure: 0,
             showTransactionsWindow: false,
             showAccountsWindow: false,
-            showCurrencyCalculator: false
+            showCurrencyCalculator: false,
+            showUserProfile: false,
+            user: null
         };
     },
     computed: {
@@ -181,6 +188,7 @@ export default {
         async fetchUser() {
             const userId = localStorage.getItem('id');
             const userResponse = await this.$axios.get('/api/User/get/' + userId);
+            this.user = userResponse.data;
             this.userName = userResponse.data.name;
             this.handleAccountsData(userResponse);
             this.transactions = userResponse.data.transactions || [];
@@ -250,6 +258,12 @@ export default {
                 }
             }
             return null;
+        },
+        handleLogout() {
+            // Handle logout logic here
+        },
+        handleUserDeletion() {
+            // Handle user deletion logic here
         }
     },
     mounted() {
