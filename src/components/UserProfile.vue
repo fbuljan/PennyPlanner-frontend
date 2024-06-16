@@ -96,7 +96,7 @@ export default {
     },
     data() {
         return {
-            userData: { ...this.user },
+            userData: {},
             showChangePasswordDialog: false,
             showDeleteUserDialog: false,
             newPassword: '',
@@ -114,6 +114,21 @@ export default {
                 message: ''
             }
         };
+    },
+    created() {
+        this.userData = { ...this.user };
+    },
+    watch: {
+        user: {
+            handler(newUser) {
+                this.userData = { ...newUser };
+            },
+            deep: true,
+            immediate: true
+        },
+        showUserProfile(newVal) {
+            this.localShowUserProfile = newVal;
+        }
     },
     computed: {
         localShowUserProfile: {
@@ -192,7 +207,7 @@ export default {
 
             this.$axios.put('/api/User/update', payload)
                 .then(() => {
-                    this.passwordAlert = {
+                    this.apiAlert = {
                         visible: true,
                         type: 'success',
                         message: 'Password changed successfully!'
@@ -267,11 +282,6 @@ export default {
                 type: '',
                 message: ''
             };
-        }
-    },
-    watch: {
-        showUserProfile(newVal) {
-            this.localShowUserProfile = newVal;
         }
     }
 };
