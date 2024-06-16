@@ -255,6 +255,7 @@ export default {
                         message: 'User account deleted successfully!'
                     };
                     setTimeout(this.clearAlerts, 5000);
+                    this.localShowUserProfile = false;
                     this.$emit('userDeleted');
                 })
                 .catch(error => {
