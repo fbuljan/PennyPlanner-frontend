@@ -122,7 +122,7 @@
         <CurrencyCalculator v-model:showCalculator="showCurrencyCalculator" />
 
         <UserProfile v-model:showUserProfile="showUserProfile" :user="user" @logout="handleLogout"
-            @userDeleted="handleUserDeletion" />
+            @userDeleted="handleUserDeletion" @updated="fetchUser"/>
 
         <v-overlay :value="showTransactionsWindow || showAccountsWindow || showCurrencyCalculator || showUserProfile">
             <div class="blur-background"></div>
