@@ -260,10 +260,14 @@ export default {
             return null;
         },
         handleLogout() {
-            // Handle logout logic here
+            localStorage.removeItem('jwt');
+            localStorage.removeItem('id');
+            this.$router.push({ name: 'LandingPage' });
         },
         handleUserDeletion() {
-            // Handle user deletion logic here
+            localStorage.removeItem('jwt');
+            localStorage.removeItem('id');
+            this.$router.push({ name: 'LandingPage' });
         }
     },
     mounted() {

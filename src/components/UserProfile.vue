@@ -269,6 +269,7 @@ export default {
             this.showDeleteUserDialog = false;
         },
         logout() {
+            this.localShowUserProfile = false;
             this.$emit('logout');
         },
         clearAlerts() {
