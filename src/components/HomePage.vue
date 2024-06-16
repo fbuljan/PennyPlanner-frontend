@@ -222,10 +222,13 @@ export default {
                     return;
                 }
 
-                account.transactions = account.transactions.filter(transaction => transaction.transactionType !== 0);
-                if (account.transactions.length > maxTransactions) {
-                    maxTransactions = account.transactions.length;
-                    this.mostUsedAccount = account;
+                const filteredTransactions = account.transactions.filter(transaction => transaction.transactionType !== 0);
+                if (filteredTransactions.length > maxTransactions) {
+                    maxTransactions = filteredTransactions;
+                    this.mostUsedAccount = {
+                        name: account.name,
+                        transactions: filteredTransactions
+                    }
                 }
             });
 
