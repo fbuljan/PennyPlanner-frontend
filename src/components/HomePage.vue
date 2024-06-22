@@ -46,7 +46,22 @@
                             </v-card>
                         </v-col>
                         <v-col cols="12" class="my-2">
-                            <v-card class="rectangle">Goals preview</v-card>
+                            <v-card class="rectangle">
+                                <v-card-title>Goals preview</v-card-title>
+                                <v-list dense style="max-height: 170px; overflow-y: auto;">
+                                    <v-list-item v-for="goal in goals" :key="goal.id" class="goal-item">
+                                        <v-list-item-content>
+                                            <v-list-item-title class="larger-text-goal">{{ goal.name }}</v-list-item-title>
+                                            <v-progress-linear :model-value="getGoalProgress(goal)" :min="0" :max="100" :color="getProgressColor(goal)"
+                                                rounded striped height="15">
+                                                <template v-slot:default>
+                                                    <strong>{{ getGoalProgress(goal).toFixed(2) }}%</strong>
+                                                </template>
+                                            </v-progress-linear>
+                                        </v-list-item-content>
+                                    </v-list-item>
+                                </v-list>
+                            </v-card>
                         </v-col>
                     </v-row>
                 </v-col>
@@ -90,8 +105,7 @@
                                 <v-card-text>
                                     <div class="stats-item">
                                         <strong>Most used account:</strong> {{ mostUsedAccount.name }} ({{
-                                        mostUsedAccount.transactions.length
-                                        }} transactions)
+                                        mostUsedAccount.transactions.length }} transactions)
                                     </div>
                                     <div class="stats-item">
                                         <strong>Most common transaction category:</strong> {{ categoryName }}
@@ -122,7 +136,7 @@
         <CurrencyCalculator v-model:showCalculator="showCurrencyCalculator" />
 
         <UserProfile v-model:showUserProfile="showUserProfile" :user="user" @logout="handleLogout"
-            @userDeleted="handleUserDeletion" @updated="fetchUser"/>
+            @userDeleted="handleUserDeletion" @updated="fetchUser" />
 
         <v-overlay :value="showTransactionsWindow || showAccountsWindow || showCurrencyCalculator || showUserProfile">
             <div class="blur-background"></div>
@@ -151,6 +165,7 @@ export default {
             accounts: [],
             transactions: [],
             categories: [],
+            goals: [],
             mostUsedAccount: { name: 'None', transactions: [] },
             mostCommonCategory: 'None',
             categoryName: "",
@@ -192,6 +207,7 @@ export default {
             this.userName = userResponse.data.name;
             this.handleAccountsData(userResponse);
             this.transactions = userResponse.data.transactions || [];
+            this.goals = userResponse.data.goals || [];
             await this.handleCategories();
             this.computeStats();
         },
@@ -258,6 +274,25 @@ export default {
                 }
             }
             return null;
+        },
+        getGoalProgress(goal) {
+            if (goal.goalType === 3) {
+                return (goal.targetValue / goal.currentValue) * 100;
+            } else {
+                return (goal.currentValue / goal.targetValue) * 100;
+            }
+        },
+        getProgressColor(goal) {
+            const progress = this.getGoalProgress(goal);
+            if (progress < 25) {
+                return 'red';
+            } else if (progress < 50) {
+                return 'orange';
+            } else if (progress < 75) {
+                return 'yellow';
+            } else {
+                return 'green';
+            }
         },
         handleLogout() {
             localStorage.removeItem('jwt');
@@ -357,6 +392,13 @@ export default {
 }
 
 .larger-text-transaction {
+    font-size: 1.15rem;
+    font-weight: bold;
+    padding-bottom: 2px;
+    line-height: 1.5;
+}
+
+.larger-text-goal {
     font-size: 1.15rem;
     font-weight: bold;
     padding-bottom: 2px;
