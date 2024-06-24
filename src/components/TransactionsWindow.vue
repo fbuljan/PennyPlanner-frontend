@@ -49,7 +49,7 @@
                                     </v-list-item-subtitle>
                                     <v-list-item-subtitle class="larger-text-transaction">
                                         {{ transaction.transactionType !== 0 ? new
-                                        Date(transaction.date).toLocaleDateString() : ""}}
+                                        Date(transaction.date).toLocaleDateString() : "" }}
                                     </v-list-item-subtitle>
                                     <v-list-item-action class="transaction-item">
                                         <v-btn v-if="transaction.transactionType === 0" icon small
@@ -157,12 +157,13 @@
                     <v-row>
                         <v-col cols="12">
                             <v-select v-model="newTransaction.accountName" :items="accountOptions" label="Account"
-                                item-text="name" item-value="id" :rules="[v => !!v || 'Account is required']"
-                                required></v-select>
+                                item-text="name" item-value="id" :rules="[v => !!v || 'Account is required']" required>
+                            </v-select>
                         </v-col>
                         <v-col cols="12">
                             <v-text-field v-model="newTransaction.amount" label="Amount" type="number"
-                                :rules="[v => !!v || 'Amount is required']" required></v-text-field>
+                                :rules="[v => !!v || 'Amount is required']" required>
+                            </v-text-field>
                         </v-col>
                         <v-col cols="12">
                             <v-text-field v-model="newTransaction.date" label="Date" type="date"
@@ -522,7 +523,7 @@ export default {
 
                 if (this.newTransaction.otherAccountName !== null) {
                     otherAccountId = this.accounts.find(account => account.name === this.newTransaction.otherAccountName).id;
-                
+
                     if (accountId === otherAccountId) {
                         this.alert = {
                             visible: true,

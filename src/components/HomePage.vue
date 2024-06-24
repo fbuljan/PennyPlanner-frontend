@@ -139,8 +139,8 @@
         <UserProfile v-model:showUserProfile="showUserProfile" :user="user" @logout="handleLogout"
             @userDeleted="handleUserDeletion" @updated="fetchUser" />
 
-        <GoalsWindow v-model:showGoalsWindow="showGoalsWindow" :goals="goals" @goalCreated="fetchUser"
-            @goalUpdated="fetchUser" @goalDeleted="fetchUser" />
+        <GoalsWindow v-model:showGoalsWindow="showGoalsWindow" :goals="goals" :goalTypes="goalTypes" :accounts="accounts"
+            @goalCreated="fetchUser" @goalUpdated="fetchUser" @goalDeleted="fetchUser" />
 
         <v-overlay :value="showTransactionsWindow || showAccountsWindow || showCurrencyCalculator || showUserProfile || showGoalsWindow">
             <div class="blur-background"></div>
@@ -173,6 +173,7 @@ export default {
             transactions: [],
             categories: [],
             goals: [],
+            goalTypes: [],
             mostUsedAccount: { name: 'None', transactions: [] },
             mostCommonCategory: 'None',
             categoryName: "",
@@ -217,6 +218,7 @@ export default {
             this.transactions = userResponse.data.transactions || [];
             this.goals = userResponse.data.goals || [];
             await this.handleCategories();
+            await this.handleGoalTypes();
             this.computeStats();
         },
         getUserDisplayName() {
@@ -235,6 +237,10 @@ export default {
         async handleCategories() {
             const categoriesResponse = await this.$axios.get('/api/Transaction/categories/');
             this.categories = categoriesResponse.data;
+        },
+        async handleGoalTypes() {
+            const typesResponse = await this.$axios.get('/api/Goal/types/');
+            this.goalTypes = typesResponse.data;
         },
         computeStats() {
             if (this.accounts.length === 0 || this.transactions.length === 0) return;

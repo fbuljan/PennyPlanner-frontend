@@ -1,5 +1,5 @@
 <template>
-    <v-dialog v-model="localShowGoalsWindow" persistent max-width="1300px">
+    <v-dialog v-model="localShowGoalsWindow" persistent max-width="1600px">
         <v-card>
             <v-alert v-if="apiAlert.visible" :type="apiAlert.type" dismissible @input="apiAlert.visible = false">
                 {{ apiAlert.message }}
@@ -18,10 +18,12 @@
                                             <strong>{{ getGoalProgress(goal).toFixed(2) }}%</strong>
                                         </template>
                                     </v-progress-linear>
-                                    <v-list-item-subtitle class="larger-text-goals">{{ goal.currentValue + " €"}} / {{
-                                        goal.targetValue  + " €"}}</v-list-item-subtitle>
+                                    <v-list-item-subtitle class="larger-text-goals balance">{{ goal.currentValue + " €"}} / {{
+                                        goal.targetValue + " €"}}</v-list-item-subtitle>
                                     <v-list-item-subtitle class="larger-text-goals">{{ getDaysUntil(goal.endDate) }}
                                         days left</v-list-item-subtitle>
+                                    <v-list-item-subtitle class="larger-text-goals">{{ getGoalTypeName(goal.goalType) }}
+                                    </v-list-item-subtitle>
                                     <v-list-item-action class="goal-item">
                                         <v-btn icon small @click.stop="openEditDialog(goal)"
                                             class="d-flex justify-center align-center">
@@ -46,40 +48,46 @@
         </v-card>
 
         <v-dialog v-model="showAddGoalDialog" persistent max-width="600px">
-            <v-card>
-                <v-card-title class="window-title">Add New Goal</v-card-title>
-                <v-card-text>
-                    <v-alert v-if="addAlert.visible" :type="addAlert.type" dismissible @input="addAlert.visible = false">
-                        {{ addAlert.message }}
-                    </v-alert>
-                    <br />
-                    <v-form ref="form" v-model="valid" lazy-validation>
-                        <v-row>
-                            <v-col cols="12">
-                                <v-text-field v-model="newGoal.name" label="Name"
-                                    :rules="[v => !!v || 'Name is required']" required></v-text-field>
-                            </v-col>
-                            <v-col cols="12">
-                                <v-text-field v-model="newGoal.goalType" label="Goal Type" type="number"
-                                    :rules="[v => !!v || 'Goal Type is required']" required></v-text-field>
-                            </v-col>
-                            <v-col cols="12">
-                                <v-text-field v-model="newGoal.endDate" label="End Date" type="date"
-                                    :rules="[v => !!v || 'End Date is required']" required></v-text-field>
-                            </v-col>
-                            <v-col cols="12">
-                                <v-text-field v-model="newGoal.targetValue" label="Target Value" type="number"
-                                    :rules="[v => !!v || 'Target Value is required']" required></v-text-field>
-                            </v-col>
-                        </v-row>
-                    </v-form>
-                </v-card-text>
-                <v-card-actions>
-                    <v-btn color="blue darken-1" text @click="showAddGoalDialog = false; this.clearAlerts()">Cancel</v-btn>
-                    <v-btn color="blue darken-1" text @click="createGoal">Create</v-btn>
-                </v-card-actions>
-            </v-card>
-        </v-dialog>
+    <v-card>
+        <v-card-title class="window-title">Add New Goal</v-card-title>
+        <v-card-text>
+            <v-alert v-if="addAlert.visible" :type="addAlert.type" dismissible @input="addAlert.visible = false">
+                {{ addAlert.message }}
+            </v-alert>
+            <br />
+            <v-form ref="form" v-model="valid" lazy-validation>
+                <v-row>
+                    <v-col cols="12">
+                        <v-text-field v-model="newGoal.name" label="Name"
+                            :rules="[v => !!v || 'Name is required']" required></v-text-field>
+                    </v-col>
+                    <v-col cols="12">
+                        <v-select v-model="newGoal.goalType" :items="goalTypeOptions" item-text="name"
+                            item-value="value" label="Goal Type" :rules="[v => !!v || 'Goal Type is required']"
+                            required></v-select>
+                    </v-col>
+                    <v-col cols="12">
+                        <v-text-field v-model="newGoal.endDate" label="End Date" type="date"
+                            :rules="[v => !!v || 'End Date is required']" required></v-text-field>
+                    </v-col>
+                    <v-col cols="12">
+                        <v-text-field v-model="newGoal.targetValue" label="Target Value" type="number"
+                            :rules="[v => !!v || 'Target Value is required']" required></v-text-field>
+                    </v-col>
+                    <v-col cols="12" v-if="isAccountRequired">
+                        <v-select v-model="newGoal.accountName" :items="accountOptions" label="Account"
+                            item-text="name" item-value="id" :rules="accountRules"
+                            required></v-select>
+                    </v-col>
+                </v-row>
+            </v-form>
+        </v-card-text>
+        <v-card-actions>
+            <v-btn color="blue darken-1" text @click="showAddGoalDialog = false; this.clearAlerts()">Cancel</v-btn>
+            <v-btn color="blue darken-1" text @click="createGoal">Create</v-btn>
+        </v-card-actions>
+    </v-card>
+</v-dialog>
 
         <v-dialog v-model="showEditGoalDialog" persistent max-width="600px">
             <v-card>
@@ -97,25 +105,28 @@
                                     :rules="[v => !!v || 'Name is required']" required></v-text-field>
                             </v-col>
                             <v-col cols="12">
-                                <v-text-field v-model="editGoal.goalType" label="Goal Type" type="number"></v-text-field>
+                                <v-select v-model="editGoal.goalType" :items="goalTypeOptions" item-text="name"
+                                    item-value="value" label="Goal Type"></v-select>
                             </v-col>
                             <v-col cols="12">
                                 <v-text-field v-model="editGoal.endDate" label="End Date" type="date"></v-text-field>
                             </v-col>
                             <v-col cols="12">
-                                <v-text-field v-model="editGoal.targetValue" label="Target Value" type="number"></v-text-field>
+                                <v-text-field v-model="editGoal.targetValue" label="Target Value"
+                                    type="number"></v-text-field>
                             </v-col>
                         </v-row>
                     </v-form>
                 </v-card-text>
                 <v-card-actions>
-                    <v-btn color="blue darken-1" text @click="showEditGoalDialog = false; this.clearAlerts()">Cancel</v-btn>
+                    <v-btn color="blue darken-1" text
+                        @click="showEditGoalDialog = false; this.clearAlerts()">Cancel</v-btn>
                     <v-btn color="blue darken-1" text @click="updateGoal">Update</v-btn>
                 </v-card-actions>
             </v-card>
         </v-dialog>
 
-        <v-dialog v-model="showDeleteGoalDialog" persistent max-width="400px">
+        <v-dialog v-model="showDeleteGoalDialog" persistent max-width="700px">
             <v-card>
                 <v-card-title class="window-title">Delete Goal</v-card-title>
                 <v-card-text>
@@ -123,7 +134,7 @@
                     <br />
                     <div v-if="goalToDelete">
                         <p><strong>Name:</strong> {{ goalToDelete.name }}</p>
-                        <p><strong>Goal Type:</strong> {{ goalToDelete.goalType }}</p>
+                        <p><strong>Goal Type:</strong> {{ getGoalTypeName(goalToDelete.goalType) }}</p>
                         <p><strong>Target Value:</strong> {{ goalToDelete.targetValue }}</p>
                         <p><strong>Current Value:</strong> {{ goalToDelete.currentValue }}</p>
                     </div>
@@ -145,7 +156,9 @@ export default {
             type: Boolean,
             default: false
         },
-        goals: Array
+        goals: Array,
+        goalTypes: Array,
+        accounts: Array
     },
     data() {
         return {
@@ -156,7 +169,8 @@ export default {
                 name: '',
                 goalType: null,
                 endDate: '',
-                targetValue: null
+                targetValue: null,
+                accountName: null
             },
             editGoal: {
                 id: null,
@@ -192,6 +206,19 @@ export default {
             set(value) {
                 this.$emit('update:showGoalsWindow', value);
             }
+        },
+        goalTypeOptions() {
+            return this.goalTypes.map(goal => goal.name);
+        },
+        accountOptions() {
+            return this.accounts.map(account => account.name);
+        },
+        isAccountRequired() {
+            const goalType = this.goalTypes.find(type => type.name === this.newGoal.goalType);
+            if (goalType !== undefined) {
+                return goalType.value === 1;
+            }
+            return false;
         }
     },
     methods: {
@@ -217,7 +244,7 @@ export default {
                 goalType: this.newGoal.goalType,
                 endDate: this.newGoal.endDate,
                 targetValue: this.newGoal.targetValue,
-                accountId: null //todo impement account binding
+                accountId: null //todo implement account binding
             };
 
             this.$axios.post('/api/Goal/create', payload)
@@ -251,7 +278,13 @@ export default {
                 });
         },
         openEditDialog(goal) {
-            this.editGoal = { ...goal };
+            this.editGoal = { 
+                id: goal.id,
+                targetValue: goal.targetValue,
+                name: goal.name,
+                goalType: this.getGoalTypeName(goal.goalType),
+                endDate: this.formatDate(goal.endDate)
+            };
             this.showEditGoalDialog = true;
         },
         updateGoal() {
@@ -379,6 +412,17 @@ export default {
             const today = new Date();
             const diff = end - today;
             return Math.ceil(diff / (1000 * 60 * 60 * 24));
+        },
+        getGoalTypeName(goalTypeValue) {
+            const goalType = this.goalTypes.find(type => type.value === goalTypeValue);
+            return goalType ? goalType.name : 'Unknown';
+        },
+        formatDate(dateString) {
+            const date = new Date(dateString);
+            const year = date.getFullYear();
+            const month = ('0' + (date.getMonth() + 1)).slice(-2);
+            const day = ('0' + date.getDate()).slice(-2);
+            return `${year}-${month}-${day}`;
         }
     },
     watch: {
@@ -416,7 +460,7 @@ export default {
 
 .goals-content {
     display: grid;
-    grid-template-columns: 25% 30% 20% 15% 10%;
+    grid-template-columns: 20% 25% 15% 12.5% 22.5% 5%;
     justify-content: start;
     justify-items: start;
     width: 100%;
@@ -447,5 +491,9 @@ export default {
 
 .v-progress-linear {
     width: 90%;
+}
+
+.balance {
+    color: #3f51b5;
 }
 </style>
