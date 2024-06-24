@@ -104,11 +104,7 @@
                                 <v-text-field v-model="editGoal.name" label="Name"
                                     :rules="[v => !!v || 'Name is required']" required></v-text-field>
                             </v-col>
-                            <v-col cols="12">
-                                <v-select v-model="editGoal.goalType" :items="goalTypeOptions" item-text="name"
-                                    item-value="value" label="Goal Type"></v-select>
-                            </v-col>
-                            <v-col cols="12">
+                            <v-col cols="12" v-if="isEndDateUpdateable">
                                 <v-text-field v-model="editGoal.endDate" label="End Date" type="date"></v-text-field>
                             </v-col>
                             <v-col cols="12">
@@ -175,9 +171,9 @@ export default {
             editGoal: {
                 id: null,
                 name: '',
-                goalType: null,
                 endDate: '',
-                targetValue: null
+                targetValue: null,
+                goalType: ''
             },
             goalToDelete: null,
             valid: false,
@@ -219,6 +215,16 @@ export default {
                 return goalType.value === 1;
             }
             return false;
+        },
+        accountRules() {
+            return this.isAccountRequired ? [v => !!v || 'Account is required'] : [];
+        },
+        isEndDateUpdateable() {
+            const goalType = this.goalTypes.find(type => type.name === this.editGoal.goalType);
+            if (goalType !== undefined) {
+                return goalType.value < 2;
+            }
+            return false;
         }
     },
     methods: {
@@ -238,13 +244,18 @@ export default {
                 return;
             }
 
+            console.log(this.newGoal)
+
+            const goalType = this.goalTypes.find(type => type.name === this.newGoal.goalType).value;
+            const accountId = this.accounts.find(account => account.name === this.newGoal.accountName)?.id || null;
+
             const payload = {
                 userId: localStorage.getItem('id'),
                 name: this.newGoal.name,
-                goalType: this.newGoal.goalType,
+                goalType,
                 endDate: this.newGoal.endDate,
-                targetValue: this.newGoal.targetValue,
-                accountId: null //todo implement account binding
+                targetValue: parseFloat(this.newGoal.targetValue),
+                accountId
             };
 
             this.$axios.post('/api/Goal/create', payload)
@@ -266,15 +277,24 @@ export default {
                     };
                 })
                 .catch(error => {
-                    //todo error handling -> validation errors
                     console.error('Error creating goal', error);
-                    this.apiAlert = {
-                        visible: true,
-                        type: 'error',
-                        message: 'Error creating goal: ' + error.response.data.title
-                    };
+                    try {
+                        const errorArray = JSON.parse(error.response.data.detail);
+                        const errorMessages = errorArray.map(error => error.ErrorMessage);
+                        this.addAlert = {
+                            visible: true,
+                            type: 'error',
+                            message: 'Error creating goal: ' + errorMessages[0]
+                        };
+                    }
+                    catch (error2) {
+                        this.addAlert = {
+                            visible: true,
+                            type: 'error',
+                            message: 'Error creating goal: ' + error.response.data.title
+                        };
+                    }
                     setTimeout(this.clearAlerts, 5000);
-                    this.showAddGoalDialog = false;
                 });
         },
         openEditDialog(goal) {
@@ -282,8 +302,8 @@ export default {
                 id: goal.id,
                 targetValue: goal.targetValue,
                 name: goal.name,
-                goalType: this.getGoalTypeName(goal.goalType),
-                endDate: this.formatDate(goal.endDate)
+                endDate: this.formatDate(goal.endDate),
+                goalType: this.getGoalTypeName(goal.goalType)
             };
             this.showEditGoalDialog = true;
         },
@@ -302,7 +322,6 @@ export default {
             const payload = {
                 id: this.editGoal.id,
                 name: this.editGoal.name,
-                goalType: this.editGoal.goalType,
                 endDate: this.editGoal.endDate,
                 targetValue: this.editGoal.targetValue
             };
@@ -321,18 +340,28 @@ export default {
                     this.editGoal = {
                         id: null,
                         name: '',
-                        goalType: null,
                         endDate: '',
                         targetValue: null
                     };
                 })
                 .catch(error => {
                     console.error('Error updating goal', error);
-                    this.updateAlert = {
-                        visible: true,
-                        type: 'error',
-                        message: 'Error updating goal: ' + error.response.data.title
-                    };
+                    try {
+                        const errorArray = JSON.parse(error.response.data.detail);
+                        const errorMessages = errorArray.map(error => error.ErrorMessage);
+                        this.updateAlert = {
+                            visible: true,
+                            type: 'error',
+                            message: 'Error updating goal: ' + errorMessages[0]
+                        };
+                    }
+                    catch (error2) {
+                        this.updateAlert = {
+                            visible: true,
+                            type: 'error',
+                            message: 'Error updating goal: ' + error.response.data.title
+                        };
+                    }
                     setTimeout(this.clearAlerts, 5000);
                 });
         },
