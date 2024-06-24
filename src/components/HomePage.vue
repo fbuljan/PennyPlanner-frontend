@@ -6,7 +6,7 @@
             <v-btn @click="showCurrencyCalculator = true">Currency calculator</v-btn>
             <v-btn @click="showTransactionsWindow = true">Transactions</v-btn>
             <v-btn @click="showAccountsWindow = true">Accounts</v-btn>
-            <v-btn>Goals</v-btn>
+            <v-btn @click="showGoalsWindow = true">Goals</v-btn>
             <v-container class="d-flex align-items-center" style="width: auto;">
                 <v-btn icon>
                     <v-icon>mdi-calendar</v-icon>
@@ -51,9 +51,10 @@
                                 <v-list dense style="max-height: 170px; overflow-y: auto;">
                                     <v-list-item v-for="goal in goals" :key="goal.id" class="goal-item">
                                         <v-list-item-content>
-                                            <v-list-item-title class="larger-text-goal">{{ goal.name }}</v-list-item-title>
-                                            <v-progress-linear :model-value="getGoalProgress(goal)" :min="0" :max="100" :color="getProgressColor(goal)"
-                                                rounded striped height="15">
+                                            <v-list-item-title class="larger-text-goal">{{ goal.name
+                                                }}</v-list-item-title>
+                                            <v-progress-linear :model-value="getGoalProgress(goal)" :min="0" :max="100"
+                                                :color="getProgressColor(goal)" rounded striped height="15">
                                                 <template v-slot:default>
                                                     <strong>{{ getGoalProgress(goal).toFixed(2) }}%</strong>
                                                 </template>
@@ -138,7 +139,10 @@
         <UserProfile v-model:showUserProfile="showUserProfile" :user="user" @logout="handleLogout"
             @userDeleted="handleUserDeletion" @updated="fetchUser" />
 
-        <v-overlay :value="showTransactionsWindow || showAccountsWindow || showCurrencyCalculator || showUserProfile">
+        <GoalsWindow v-model:showGoalsWindow="showGoalsWindow" :goals="goals" @goalCreated="fetchUser"
+            @goalUpdated="fetchUser" @goalDeleted="fetchUser" />
+
+        <v-overlay :value="showTransactionsWindow || showAccountsWindow || showCurrencyCalculator || showUserProfile || showGoalsWindow">
             <div class="blur-background"></div>
         </v-overlay>
     </div>
@@ -149,6 +153,8 @@ import TransactionsWindow from './TransactionsWindow.vue';
 import AccountsWindow from './AccountsWindow.vue';
 import CurrencyCalculator from './CurrencyCalculator.vue';
 import UserProfile from './UserProfile.vue';
+import GoalsWindow from './GoalsWindow.vue';
+
 
 export default {
     name: 'HomePage',
@@ -156,7 +162,8 @@ export default {
         TransactionsWindow,
         AccountsWindow,
         CurrencyCalculator,
-        UserProfile
+        UserProfile,
+        GoalsWindow
     },
     data() {
         return {
@@ -175,6 +182,7 @@ export default {
             showAccountsWindow: false,
             showCurrencyCalculator: false,
             showUserProfile: false,
+            showGoalsWindow: false,
             user: null
         };
     },
