@@ -1,8 +1,10 @@
 <template>
     <div>
         <v-toolbar color="primary" dark prominent>
-            <v-toolbar-title><strong>PennyPlanner</strong></v-toolbar-title>
-            <v-spacer></v-spacer>
+            <v-toolbar-title class="d-flex align-center" style="margin: 0; padding: 0;">
+                <img :src="require('../assets/logo_toolbar_white.png')" alt="PennyPlanner Logo" 
+                style="height: 50px; padding-top: 10px; padding-left: 10px;" />
+            </v-toolbar-title>
             <v-btn @click="showLoginDialog = true">Log in</v-btn>
             <v-btn @click="showRegisterDialog = true">Sign up</v-btn>
         </v-toolbar>
@@ -83,9 +85,9 @@
                     </v-card>
                 </v-col>
                 <v-col cols="12" md="4">
-                    <v-img src="../assets/background-toolbar.jpg" class="mb-4"></v-img>
-                    <v-img src="../assets/background-toolbar.jpg" class="mb-4"></v-img>
-                    <v-img src="../assets/background-toolbar.jpg"></v-img>
+                    <v-img src="../assets/home-page-example.png" class="mb-4"></v-img>
+                    <v-img src="../assets/graph-example.png" class="mb-4"></v-img>
+                    <v-img src="../assets/calendar-example.png"></v-img>
                 </v-col>
             </v-row>
         </v-container>
@@ -110,7 +112,6 @@
                 </v-card-text>
                 <v-card-actions>
                     <v-spacer></v-spacer>
-                    <v-btn color="blue darken-1" text @click="testLogin">Test</v-btn>
                     <v-btn color="blue darken-1" text @click="showLoginDialog = false; loginError = null">Cancel</v-btn>
                     <v-btn color="blue darken-1" text @click="login">Log in</v-btn>
                 </v-card-actions>
@@ -207,12 +208,6 @@ export default {
                     this.registerError = error.response.data.detail;
                 }
             }
-        },
-        async testLogin() {
-            this.loginData = {
-                login: "filip123456",
-                password: "Volimliverpool1"
-            };
         }
     }
 }

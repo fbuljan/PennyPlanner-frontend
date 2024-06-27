@@ -1,8 +1,10 @@
 <template>
     <div>
-        <v-toolbar color="primary" dark prominent>
-            <v-toolbar-title><strong>PennyPlanner</strong></v-toolbar-title>
-            <v-spacer></v-spacer>
+        <v-toolbar color="primary" dark prominent style="position: relative">
+            <v-toolbar-title class="d-flex align-center" style="margin: 0; padding: 0;">
+                <img :src="require('../assets/logo_toolbar_white.png')" alt="PennyPlanner Logo" 
+                style="height: 50px; padding-top: 10px; padding-left: 10px;" />
+            </v-toolbar-title>
             <v-btn @click="showCurrencyCalculator = true">Currency calculator</v-btn>
             <v-btn @click="showTransactionsWindow = true">Transactions</v-btn>
             <v-btn @click="showAccountsWindow = true">Accounts</v-btn>
@@ -139,12 +141,13 @@
         <UserProfile v-model:showUserProfile="showUserProfile" :user="user" @logout="handleLogout"
             @userDeleted="handleUserDeletion" @updated="fetchUser" />
 
-        <GoalsWindow v-model:showGoalsWindow="showGoalsWindow" :goals="goals" :goalTypes="goalTypes" :accounts="accounts"
-            @goalCreated="fetchUser" @goalUpdated="fetchUser" @goalDeleted="fetchUser" />
+        <GoalsWindow v-model:showGoalsWindow="showGoalsWindow" :goals="goals" :goalTypes="goalTypes"
+            :accounts="accounts" @goalCreated="fetchUser" @goalUpdated="fetchUser" @goalDeleted="fetchUser" />
 
         <Calendar v-model:showCalendar="showCalendar" :goals="goals" :transactions="transactions" />
 
-        <v-overlay :value="showTransactionsWindow || showAccountsWindow || showCurrencyCalculator || showUserProfile || showGoalsWindow || showCalendar">
+        <v-overlay
+            :value="showTransactionsWindow || showAccountsWindow || showCurrencyCalculator || showUserProfile || showGoalsWindow || showCalendar">
             <div class="blur-background"></div>
         </v-overlay>
     </div>
