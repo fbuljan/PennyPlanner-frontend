@@ -3,7 +3,8 @@ import App from "./App.vue";
 import vuetify from "./plugins/vuetify";
 import { loadFonts } from "./plugins/webfontloader";
 import axios from "./axios";
-import router from './router';
+import router from './router'
+import 'vuetify/styles';
 
 loadFonts();
 

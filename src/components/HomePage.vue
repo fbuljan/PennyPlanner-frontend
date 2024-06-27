@@ -8,7 +8,7 @@
             <v-btn @click="showAccountsWindow = true">Accounts</v-btn>
             <v-btn @click="showGoalsWindow = true">Goals</v-btn>
             <v-container class="d-flex align-items-center" style="width: auto;">
-                <v-btn icon>
+                <v-btn icon @click="showCalendar = true">
                     <v-icon>mdi-calendar</v-icon>
                 </v-btn>
                 <v-btn icon @click="showUserProfile = true">
@@ -142,7 +142,9 @@
         <GoalsWindow v-model:showGoalsWindow="showGoalsWindow" :goals="goals" :goalTypes="goalTypes" :accounts="accounts"
             @goalCreated="fetchUser" @goalUpdated="fetchUser" @goalDeleted="fetchUser" />
 
-        <v-overlay :value="showTransactionsWindow || showAccountsWindow || showCurrencyCalculator || showUserProfile || showGoalsWindow">
+        <Calendar v-model:showCalendar="showCalendar" :goals="goals" :transactions="transactions" />
+
+        <v-overlay :value="showTransactionsWindow || showAccountsWindow || showCurrencyCalculator || showUserProfile || showGoalsWindow || showCalendar">
             <div class="blur-background"></div>
         </v-overlay>
     </div>
@@ -154,7 +156,7 @@ import AccountsWindow from './AccountsWindow.vue';
 import CurrencyCalculator from './CurrencyCalculator.vue';
 import UserProfile from './UserProfile.vue';
 import GoalsWindow from './GoalsWindow.vue';
-
+import Calendar from './Calendar.vue';
 
 export default {
     name: 'HomePage',
@@ -163,7 +165,8 @@ export default {
         AccountsWindow,
         CurrencyCalculator,
         UserProfile,
-        GoalsWindow
+        GoalsWindow,
+        Calendar
     },
     data() {
         return {
@@ -184,6 +187,7 @@ export default {
             showCurrencyCalculator: false,
             showUserProfile: false,
             showGoalsWindow: false,
+            showCalendar: false,
             user: null
         };
     },
