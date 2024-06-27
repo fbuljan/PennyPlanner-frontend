@@ -381,7 +381,15 @@ export default {
                         accountName: account ? account.name : 'Unknown'
                     };
                 })
-                .sort((a, b) => new Date(b.date) - new Date(a.date));
+                .sort((a, b) => {
+                    const dateA = new Date(a.date);
+                    const dateB = new Date(b.date);
+                    if (dateA.getTime() === dateB.getTime()) {
+                        return b.id - a.id;
+                    }
+                    
+                    return dateB - dateA;
+                })
         },
         filteredMostUsedAccount() {
             const accountTransactionCounts = this.accounts.reduce((acc, account) => {
