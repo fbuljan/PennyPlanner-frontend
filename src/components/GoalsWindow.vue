@@ -12,25 +12,19 @@
                             <v-list-item v-for="goal in goals" :key="goal.id" class="goal-item">
                                 <v-list-item-content class="goals-content">
                                     <v-list-item-title class="larger-text-goals">{{ goal.name }}</v-list-item-title>
-                                    <v-progress-linear :model-value="getGoalProgress(goal)" :min="0" :max="100"
-                                        :color="getProgressColor(goal)" rounded striped height="20" style="top: 10px">
+                                    <v-progress-linear :model-value="getGoalProgress(goal)" :min="0" :max="100" :color="getProgressColor(goal)" rounded striped height="20" style="top: 10px">
                                         <template v-slot:default>
                                             <strong>{{ getGoalProgress(goal).toFixed(2) }}%</strong>
                                         </template>
                                     </v-progress-linear>
-                                    <v-list-item-subtitle class="larger-text-goals balance">{{ goal.currentValue + " €"}} / {{
-                                        goal.targetValue + " €"}}</v-list-item-subtitle>
-                                    <v-list-item-subtitle class="larger-text-goals">{{ getDaysUntil(goal.endDate) }}
-                                        days left</v-list-item-subtitle>
-                                    <v-list-item-subtitle class="larger-text-goals">{{ getGoalTypeName(goal.goalType) }}
-                                    </v-list-item-subtitle>
+                                    <v-list-item-subtitle class="larger-text-goals balance">{{ goal.currentValue + " €"}} / {{ goal.targetValue + " €"}}</v-list-item-subtitle>
+                                    <v-list-item-subtitle class="larger-text-goals">{{ getDaysUntil(goal.endDate) }} days left</v-list-item-subtitle>
+                                    <v-list-item-subtitle class="larger-text-goals">{{ getGoalTypeName(goal.goalType) }}</v-list-item-subtitle>
                                     <v-list-item-action class="goal-item">
-                                        <v-btn icon small @click.stop="openEditDialog(goal)"
-                                            class="d-flex justify-center align-center">
+                                        <v-btn icon small @click.stop="openEditDialog(goal)" class="d-flex justify-center align-center">
                                             <v-icon>mdi-pencil</v-icon>
                                         </v-btn>
-                                        <v-btn icon small @click.stop="openDeleteDialog(goal)"
-                                            class="d-flex justify-center align-center">
+                                        <v-btn icon small @click.stop="openDeleteDialog(goal)" class="d-flex justify-center align-center">
                                             <v-icon>mdi-delete</v-icon>
                                         </v-btn>
                                     </v-list-item-action>
@@ -489,7 +483,8 @@ export default {
 
 .goals-content {
     display: grid;
-    grid-template-columns: 20% 25% 15% 12.5% 22.5% 5%;
+    grid-template-columns: repeat(6, 1fr);
+    grid-gap: 10px;
     justify-content: start;
     justify-items: start;
     width: 100%;
@@ -524,5 +519,28 @@ export default {
 
 .balance {
     color: #3f51b5;
+}
+
+@media (max-width: 1200px) {
+    .goals-content {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+@media (max-width: 900px) {
+    .goals-content {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 600px) {
+    .goals-content {
+        grid-template-columns: 1fr;
+    }
+
+    .goal-item .v-list-item-action,
+    .larger-text-goals {
+        flex: 1 1 100%;
+    }
 }
 </style>
